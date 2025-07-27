@@ -1,0 +1,16 @@
+.section-static {
+    content-align-horizontal: center;
+    text-align: center;
+    text-style: reverse;
+}
+
+SwitchWithLabel {
+    height: auto;
+    layout: horizontal;
+    width: auto;
+}
+
+SwitchWithLabel Label {
+    padding: 1;
+    text-align: right;
+}

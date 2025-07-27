@@ -1,6 +1,6 @@
 from textual.app import ComposeResult
 from textual.screen import Screen
-from textual.widgets import Footer, Header, Static
+from textual.widgets import Footer, Header, Rule
 
 from word_app.data.sources import DataSource
 from word_app.ui.navigation.common import POP_SCREEN
@@ -19,6 +19,7 @@ class SettingsScreen(Screen):
 
     def compose(self) -> ComposeResult:
         yield Header(icon="")
+
         yield SectionStatic("Data Sources")
         for source in self._data_sources:
             yield SwitchWithLabel(
@@ -26,4 +27,6 @@ class SettingsScreen(Screen):
                 label_tooltip=source.label_description,
                 switch_value=False,
             )
+        yield Rule(line_style="heavy")
+
         yield Footer()

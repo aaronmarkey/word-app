@@ -1,16 +1,27 @@
-.section-static {
-    content-align-horizontal: center;
-    text-align: center;
-    text-style: reverse;
-}
-
+/* Container  and Widgets */
 SwitchWithLabel {
     height: auto;
     layout: horizontal;
     width: auto;
+    margin-bottom: 1;
+    margin-top: 1;
+    padding-right: 2;
+    padding-left: 2;
 }
 
 SwitchWithLabel Label {
-    padding: 1;
-    text-align: right;
+    padding-right: 1;
+    padding-top: 1; /* idk why CSS is so fucking bad at centering things. */
+}
+
+/* Classes */
+.container-bordered {
+    border: solid $secondary;
+    border-title-align: left;
+    border-title-color: $secondary;
+    border-title-style: bold;
+}
+
+.input--placeholder {
+    color: $foreground-darken-3;
 }

@@ -5,5 +5,5 @@ POP_SCREEN = Navigateable(
     id="back",
     name="Back",
     description="Go back to the previous screen.",
-    kb_binding="escape"
+    kb_binding="escape",
 )

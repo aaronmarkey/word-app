@@ -11,7 +11,6 @@ from word_app.ui.screens.settings import SettingsScreen
 
 @dataclass
 class NavigateableScreen(Navigateable):
-
     callable: Callable[[], Screen]
     discoverable: bool = False
 
@@ -21,7 +20,12 @@ class NavigateableScreen(Navigateable):
 
     @property
     def system_command(self) -> SystemCommand:
-        return SystemCommand(self.name, self.description, self.callable, discover=self.discoverable)
+        return SystemCommand(
+            self.name,
+            self.description,
+            self.callable,
+            discover=self.discoverable,
+        )
 
 
 SETTINGS = NavigateableScreen(

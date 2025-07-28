@@ -12,12 +12,14 @@ class DataSource:
         NONE = 0
         BASIC = 1
 
+    id: str
     label_description: str
     label_name: str
     authentication: Authentication
 
 
 DataMuseDataSource = DataSource(
+    id="datamuse",
     label_description=(
         "Datamuse provides meta-information about words. "
         "For example: synonyms, related words."
@@ -27,6 +29,7 @@ DataMuseDataSource = DataSource(
 )
 
 WordnikDataSource = DataSource(
+    id="wordnik",
     label_description=(
         "Wordnik provides definitions, examples, synonyms, antonyms, and more."
     ),

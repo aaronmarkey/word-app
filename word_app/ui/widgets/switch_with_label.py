@@ -66,6 +66,7 @@ class SwitchWithInput(SwitchWithLabel):
         label_text: str,
         switch_value: bool,
         input_placeholder: str,
+        input_value: str = "",
         label_length: int = -1,
         label_format: bool = True,
         label_tooltip: str = "",
@@ -78,10 +79,11 @@ class SwitchWithInput(SwitchWithLabel):
             label_tooltip=label_tooltip,
         )
         self.input_placeholder = input_placeholder
+        self.input_value = input_value
         self.child_input = self._build_input()
 
     def _build_input(self) -> Input:
-        inp = Input(placeholder=self.input_placeholder)
+        inp = Input(self.input_value, placeholder=self.input_placeholder)
         inp.display = self.switch_value
         return inp
 

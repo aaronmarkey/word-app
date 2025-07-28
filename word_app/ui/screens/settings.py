@@ -11,12 +11,12 @@ from word_app.ui.widgets.switch_with_label import SwitchWithInput
 
 
 class SettingsScreen(Screen):
+    AUTO_FOCUS = ""
     BINDINGS = [POP_SCREEN.binding]
 
     def __init__(self, *, data_sources: list[DataSource]) -> None:
         super().__init__()
         self._data_sources = data_sources
-
         self.title = "⚙️ Settings"
 
     def _compose_switch_with_label(self) -> list[SwitchWithLabel]:

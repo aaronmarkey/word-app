@@ -1,5 +1,3 @@
-from typing import ClassVar
-
 from textual.app import ComposeResult
 from textual.containers import HorizontalGroup
 from textual.widget import Widget
@@ -9,21 +7,23 @@ from word_app.ui.constants import TOOLTIP_ICON
 
 
 class SwitchWithLabel(Widget):
-    _label_separator: ClassVar[str] = ":"
-
     def __init__(
         self,
         *,
+        id: str,
         label_text: str,
         switch_value: bool,
         label_length: int = -1,
         label_format: bool = True,
+        label_separator: str = ":",
         label_tooltip: str = "",
     ) -> None:
         super().__init__()
+        self.id = id
         self.label_text = label_text
         self.label_length = label_length
         self.label_format = label_format
+        self.label_separator = label_separator
         self.label_tooltip = label_tooltip
 
         self.switch_value = switch_value
@@ -37,7 +37,7 @@ class SwitchWithLabel(Widget):
             lt += f" {TOOLTIP_ICON}"
 
         if self.label_format:
-            lt += self._label_separator
+            lt += self.label_separator
 
         label = Label(lt)
 
@@ -47,7 +47,7 @@ class SwitchWithLabel(Widget):
         return label
 
     def _build_switch(self) -> Switch:
-        return Switch(animate=False, value=self.switch_value)
+        return Switch(animate=False, id=self.id, value=self.switch_value)
 
     def compose(self) -> ComposeResult:
         yield HorizontalGroup(
@@ -63,19 +63,23 @@ class SwitchWithInput(SwitchWithLabel):
     def __init__(
         self,
         *,
+        id: str,
         label_text: str,
-        switch_value: bool,
         input_placeholder: str,
+        switch_value: bool,
         input_value: str = "",
         label_length: int = -1,
         label_format: bool = True,
+        label_separator: str = ":",
         label_tooltip: str = "",
     ) -> None:
         super().__init__(
+            id=id,
             label_text=label_text,
             switch_value=switch_value,
             label_length=label_length,
             label_format=label_format,
+            label_separator=label_separator,
             label_tooltip=label_tooltip,
         )
         self.input_placeholder = input_placeholder

@@ -7,7 +7,7 @@ from textual.app import App, ComposeResult, SystemCommand
 from textual.screen import Screen
 from textual.widgets import Footer
 
-from word_app.app_conf import AppConf
+from word_app.app.conf import AppConf
 from word_app.data.sources import DataSource
 from word_app.io import ApplicationPath
 from word_app.ui.screens.settings import SettingsScreen
@@ -21,7 +21,7 @@ class WordAppContext:
 
 
 class WordApp(App):
-    CSS_PATH = "app.css"
+    CSS_PATH = "main.css"
     BINDINGS = [
         (SettingsScreen.WA_BINDING, "push_settings", SettingsScreen.WA_TITLE)
     ]
@@ -30,6 +30,7 @@ class WordApp(App):
         super().__init__(*args, **kwargs)
         self.ctx = ctx
 
+    # Base Class Methods.
     def get_system_commands(self, screen: Screen) -> Iterable[SystemCommand]:
         yield from super().get_system_commands(screen)
         yield SystemCommand(
@@ -37,10 +38,7 @@ class WordApp(App):
             SettingsScreen.WA_DESCRIPTION,
             (
                 lambda: self.push_screen(
-                    SettingsScreen(
-                        app_conf=self.ctx.conf,
-                        data_sources=self.ctx.data_sources,
-                    ),
+                    self.assemble_settings_screen(),
                     wait_for_dismiss=False,
                 )
             ),
@@ -50,12 +48,18 @@ class WordApp(App):
     def compose(self) -> ComposeResult:
         yield Footer()
 
+    # Dynamically Generated Methods.
     def action_push_settings(self) -> None:
-        screen = SettingsScreen(
+        self.push_screen(
+            self.assemble_settings_screen(), wait_for_dismiss=False
+        )
+
+    # My Functions
+    def assemble_settings_screen(self) -> SettingsScreen:
+        return SettingsScreen(
             app_conf=self.ctx.conf,
             data_sources=self.ctx.data_sources,
         )
-        self.push_screen(screen, wait_for_dismiss=False)
 
 
 def create_app(ctx: WordAppContext) -> WordApp:

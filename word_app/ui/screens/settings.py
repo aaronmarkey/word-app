@@ -1,8 +1,9 @@
+from textual import on
 from textual.app import ComposeResult
 from textual.containers import VerticalGroup
-from textual.widgets import Footer, Header
+from textual.widgets import Footer, Header, Switch
 
-from word_app.app_conf import AppConf
+from word_app.app.conf import AppConf
 from word_app.data.sources import DataSource
 from word_app.ext import WAScreen
 from word_app.ui.containers import ContainerWithBorderLabel
@@ -12,13 +13,12 @@ from word_app.ui.widgets.switch_with_label import SwitchWithInput
 
 
 class SettingsScreen(WAScreen):
+    WA_BINDING = "s"
+    WA_DESCRIPTION = "Configure the application."
+    WA_TITLE = "Settings"
+
     AUTO_FOCUS = ""
     BINDINGS = [POP_SCREEN.binding]
-
-    WA_TITLE = "Settings"
-    WA_DESCRIPTION = "Configure the application."
-    WA_BINDING = "s"
-
     TITLE = "⚙️ " + WA_TITLE
 
     def __init__(
@@ -35,29 +35,31 @@ class SettingsScreen(WAScreen):
 
         widgets: list[SwitchWithLabel] = []
         for ds in self._data_sources:
-            ds_conf = self._app_conf.conf_for_data_source(ds)
-            widget = (
-                SwitchWithLabel(
-                    label_text=ds.label_name,
-                    switch_value=ds_conf.enabled,
-                    label_format=True,
-                    label_length=longest_name,
-                    label_tooltip=ds.label_description,
-                )
-                if ds.authentication is DataSource.Authentication.NONE
-                else (
-                    SwitchWithInput(
+            if ds_conf := getattr(self._app_conf.ds, ds.id, None):
+                widget = (
+                    SwitchWithLabel(
+                        id=ds.id,
                         label_text=ds.label_name,
-                        switch_value=ds_conf.enabled,
                         label_format=True,
                         label_length=longest_name,
                         label_tooltip=ds.label_description,
-                        input_placeholder="Enter API Key",
-                        input_value=ds_conf.api_key,
+                        switch_value=ds_conf.enabled,
+                    )
+                    if ds.authentication is DataSource.Authentication.NONE
+                    else (
+                        SwitchWithInput(
+                            id=ds.id,
+                            label_text=ds.label_name,
+                            label_format=True,
+                            label_length=longest_name,
+                            label_tooltip=ds.label_description,
+                            input_placeholder="Enter API Key",
+                            input_value=ds_conf.api_key,
+                            switch_value=ds_conf.enabled,
+                        )
                     )
                 )
-            )
-            widgets.append(widget)
+                widgets.append(widget)
 
         return widgets
 
@@ -69,3 +71,7 @@ class SettingsScreen(WAScreen):
         )
 
         yield Footer()
+
+    @on(Switch.Changed, "#datamuse")
+    def switch_changed(self, event: Switch.Changed) -> None:
+        print(event.value)

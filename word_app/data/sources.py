@@ -1,13 +1,12 @@
 """Module contains all the sources we pull language information from."""
 
-from dataclasses import dataclass
+from copy import deepcopy
 from enum import IntEnum
 
+from pydantic import BaseModel
 
-@dataclass
-class DataSource:
-    """Base class for all data sources."""
 
+class DataSource(BaseModel):
     class Authentication(IntEnum):
         NONE = 0
         BASIC = 1
@@ -37,4 +36,10 @@ WordnikDataSource = DataSource(
     authentication=DataSource.Authentication.BASIC,
 )
 
-DATA_SOURCES: list[DataSource] = [DataMuseDataSource, WordnikDataSource]
+_AVAILABLE_DATA_SOURCES = [DataMuseDataSource, WordnikDataSource]
+
+
+def get_available_data_sources(
+    sources: list[DataSource] = _AVAILABLE_DATA_SOURCES,
+) -> list[DataSource]:
+    return deepcopy(sources)

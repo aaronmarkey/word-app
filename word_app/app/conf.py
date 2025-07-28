@@ -3,8 +3,10 @@
 from __future__ import annotations
 
 from pathlib import Path
+from typing import TYPE_CHECKING
 
-from word_app.data.sources import DataSource
+if TYPE_CHECKING:
+    from word_app.data.sources import DataSource
 
 from pydantic import BaseModel
 from pydantic_settings import BaseSettings, SettingsConfigDict
@@ -23,13 +25,17 @@ class WordnikConf(DataSourceConf):
     api_key: str
 
 
+class DataSourceConfContainer(BaseModel):
+    datamuse: DataMuseConf
+    wordnik: WordnikConf
+
+
 class AppConf(BaseSettings):
     model_config = SettingsConfigDict(
-        env_nested_delimiter="__", env_nested_max_split=1, env_prefix="WA__"
+        env_nested_delimiter="__", env_prefix="WA_"
     )
 
-    ds_datamuse: DataMuseConf
-    ds_wordnik: WordnikConf
+    ds: DataSourceConfContainer
 
     @classmethod
     def from_env(cls: type[AppConf], env_path: Path) -> AppConf:

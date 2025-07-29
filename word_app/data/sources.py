@@ -5,6 +5,8 @@ from enum import IntEnum
 
 from pydantic import BaseModel
 
+from word_app.lex import EN_LANG
+
 
 class DataSource(BaseModel):
     class Authentication(IntEnum):
@@ -19,20 +21,15 @@ class DataSource(BaseModel):
 
 DataMuseDataSource = DataSource(
     id="datamuse",
-    label_description=(
-        "Datamuse provides meta-information about words. "
-        "For example: synonyms, related words."
-    ),
-    label_name="Datamuse",
+    label_description=EN_LANG.DS_DATAMUSE_DESC,
+    label_name=EN_LANG.DS_DATAMUSE_NAME,
     authentication=DataSource.Authentication.NONE,
 )
 
 WordnikDataSource = DataSource(
     id="wordnik",
-    label_description=(
-        "Wordnik provides definitions, examples, synonyms, antonyms, and more."
-    ),
-    label_name="Wordnik",
+    label_description=EN_LANG.DS_WORDNIK_DESC,
+    label_name=EN_LANG.DS_WORDNIK_NAME,
     authentication=DataSource.Authentication.BASIC,
 )
 

@@ -10,5 +10,5 @@ def run() -> None:
 
     ds = get_available_data_sources()
     ctx = WordAppContext(conf=app_conf, data_sources=ds, path=app_path)
-    app = create_app(ctx)
+    app = create_app(ctx=ctx)
     app.run()

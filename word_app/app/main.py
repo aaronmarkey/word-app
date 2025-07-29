@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import os
+
 from dataclasses import dataclass
 from typing import Iterable
 
@@ -21,14 +23,22 @@ class WordAppContext:
 
 
 class WordApp(App):
-    CSS_PATH = "main.css"
     BINDINGS = [
         (SettingsScreen.WA_BINDING, "push_settings", SettingsScreen.WA_TITLE)
     ]
+    CSS_PATH = "main.css"
+    TOOLTIP_DELAY = 0.2
 
-    def __init__(self, ctx: WordAppContext, *args, **kwargs) -> None:
+    def __init__(self, *args, **kwargs) -> None:
+        try:
+            ctx = kwargs.pop("ctx")
+        except KeyError:
+            raise SystemError("Application context was not provided.")
+
+        should_persist = kwargs.pop("should_persist", False)
         super().__init__(*args, **kwargs)
         self.ctx = ctx
+        self.should_persist = should_persist
 
     # Base Class Methods.
     def get_system_commands(self, screen: Screen) -> Iterable[SystemCommand]:
@@ -62,6 +72,11 @@ class WordApp(App):
         )
 
 
-def create_app(ctx: WordAppContext) -> WordApp:
-    app = WordApp(ctx)
+def create_app(*, ctx: WordAppContext) -> WordApp:
+    try:
+        should_persist = bool(int(os.environ.get("WA_PERSIST_DATA", "0")))
+    except Exception:
+        should_persist = False
+
+    app = WordApp(ctx=ctx, should_persist=should_persist)
     return app

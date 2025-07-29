@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from pathlib import Path
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 if TYPE_CHECKING:
     from word_app.data.sources import DataSource
@@ -45,3 +45,7 @@ class AppConf(BaseSettings):
 
     def conf_for_data_source(self, ds: DataSource) -> DataSourceConf:
         return getattr(self, f"ds_{ds.id.lower()}")
+
+    def update_ds_by_name(self, name: str, prop: str, value: Any) -> None:
+        ds = getattr(self.ds, name)
+        setattr(ds, prop, value)

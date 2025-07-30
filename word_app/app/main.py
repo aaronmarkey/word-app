@@ -12,7 +12,7 @@ from textual.widgets import Footer
 from word_app.app.conf import AppConf
 from word_app.data.sources import DataSource
 from word_app.io import ApplicationPath
-from word_app.ui.screens.settings import SettingsScreen
+from word_app.ui.screens import SettingsScreen
 
 
 @dataclass

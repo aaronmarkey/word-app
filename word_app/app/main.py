@@ -11,8 +11,9 @@ from textual.widgets import Footer
 
 from word_app.app.conf import AppConf
 from word_app.data.sources import DataSource
+from word_app.dev.assemble_screen import example_word_screen
 from word_app.io import ApplicationPath
-from word_app.ui.screens import SettingsScreen
+from word_app.ui.screens import SettingsScreen, WordDetailScreen
 
 
 @dataclass
@@ -24,7 +25,8 @@ class WordAppContext:
 
 class WordApp(App):
     BINDINGS = [
-        (SettingsScreen.WA_BINDING, "push_settings", SettingsScreen.WA_TITLE)
+        (SettingsScreen.WA_BINDING, "push_settings", SettingsScreen.WA_TITLE),
+        (WordDetailScreen.WA_BINDING, "push_word", WordDetailScreen.WA_TITLE),
     ]
     CSS_PATH = "main.css"
     TOOLTIP_DELAY = 0.2
@@ -63,6 +65,9 @@ class WordApp(App):
         self.push_screen(
             self.assemble_settings_screen(), wait_for_dismiss=False
         )
+
+    def action_push_word(self) -> None:
+        self.push_screen(example_word_screen())
 
     # My Functions
     def assemble_settings_screen(self) -> SettingsScreen:

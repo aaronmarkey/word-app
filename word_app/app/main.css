@@ -1,4 +1,19 @@
 /* Container  and Widgets */
+Sidebar {
+    dock: left;
+    width: 25%;
+    height: 100vh;
+    background: $background-lighten-1;
+}
+
+Sidebar.with-header {
+    offset: 0 1;
+}
+
+Sidebar > Button {
+    width: 100%;
+}
+
 SwitchWithLabel {
     height: auto;
     layout: horizontal;

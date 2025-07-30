@@ -11,8 +11,7 @@ from word_app.ext import WAScreen
 from word_app.lex import EN_LANG
 from word_app.ui.containers import ContainerWithBorderLabel
 from word_app.ui.navigation.common import POP_SCREEN
-from word_app.ui.widgets import SwitchWithLabel
-from word_app.ui.widgets.switch_with_label import SwitchWithInput
+from word_app.ui.widgets import SwitchWithInput, SwitchWithLabel
 
 
 class WidgetId:
@@ -33,11 +32,12 @@ class WidgetId:
 class SettingsScreen(WAScreen):
     WA_BINDING = "s"
     WA_DESCRIPTION = EN_LANG.SETTINGS_SCREEN_DESC
+    WA_ICON = "⚙️"
     WA_TITLE = EN_LANG.SETTINGS_SCREEN_TITLE
 
     AUTO_FOCUS = ""
     BINDINGS = [POP_SCREEN.binding]
-    TITLE = "⚙️ " + WA_TITLE
+    TITLE = WA_ICON + " " + WA_TITLE
 
     def __init__(
         self, *, app_conf: AppConf, data_sources: list[DataSource]
@@ -83,7 +83,9 @@ class SettingsScreen(WAScreen):
         return widgets
 
     def compose(self) -> ComposeResult:
-        yield Header(icon="")
+        h = Header(icon="")
+        h.disabled = True
+        yield h
 
         yield ContainerWithBorderLabel(
             EN_LANG.SETTINGS_SCREEN_SECTION_DS_TITLE,

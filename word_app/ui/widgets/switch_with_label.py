@@ -3,7 +3,7 @@ from textual.containers import HorizontalGroup
 from textual.widget import Widget
 from textual.widgets import Input, Label, Switch
 
-from word_app.ui.constants import TOOLTIP_ICON
+from word_app.ui.widgets.labels import WALabel
 
 
 class SwitchWithLabel(Widget):
@@ -31,20 +31,13 @@ class SwitchWithLabel(Widget):
     def _build_label(self) -> Label:
         diff = self.label_length - len(self.label_text)
         padding = 0 if diff < 0 else diff
-        lt = f"{' ' * padding}{self.label_text}"
 
-        if self.label_tooltip:
-            lt += f" {TOOLTIP_ICON}"
-
-        if self.label_format:
-            lt += self.label_separator
-
-        label = Label(lt)
-
-        if self.label_tooltip:
-            label.tooltip = self.label_tooltip
-
-        return label
+        return WALabel(
+            self.label_text,
+            lpadding=padding,
+            tooltip=self.label_tooltip,
+            separator=self.label_separator,
+        )
 
     def _build_switch(self) -> Switch:
         return Switch(animate=False, id=self.switch_id, value=self.switch_value)

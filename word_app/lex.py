@@ -16,6 +16,13 @@ class Lexicon:
     SETTINGS_SCREEN_SECTION_DS_TITLE: str
     SETTINGS_SCREEN_TITLE: str
 
+    SIDEBAR_DEFINITIONS_TITLE: str
+    SIDEBAR_DEFINITIONS_DESCRIPTION: str
+    SIDEBAR_THESAURUS_TITLE: str
+    SIDEBAR_THESAURUS_DESCRIPTION: str
+    SIDEBAR_PHRASES_TITLE: str
+    SIDEBAR_PHRASES_DESCRIPTION: str
+
 
 EN_LANG = Lexicon(
     BACK="Back",
@@ -32,4 +39,10 @@ EN_LANG = Lexicon(
     SETTINGS_SCREEN_DESC="Configure the application.",
     SETTINGS_SCREEN_SECTION_DS_TITLE="Data Sources",
     SETTINGS_SCREEN_TITLE="Settings",
+    SIDEBAR_DEFINITIONS_TITLE="Definitions",
+    SIDEBAR_DEFINITIONS_DESCRIPTION="Definitions of the word.",
+    SIDEBAR_THESAURUS_TITLE="Thesaurus",
+    SIDEBAR_THESAURUS_DESCRIPTION="Synonyms, antonyms, hyponyms, and hypernyms of the word.",
+    SIDEBAR_PHRASES_TITLE="Examples",
+    SIDEBAR_PHRASES_DESCRIPTION="Example phrases containing the word.",
 )

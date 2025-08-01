@@ -1,4 +1,4 @@
-from word_app.data.models import Definition, Phrase, Word
+from word_app.data.models import Definition, Definitions, Phrase, Word
 from word_app.ui.screens import WordDetailScreen
 
 
@@ -9,6 +9,8 @@ def example_word_screen() -> WordDetailScreen:
     )
     phrase = Phrase(tokens=["Pokemon", "names", "are", "onomatopoeia"])
 
-    word = Word(word="onomatopoeia", definitions=[definition], phrases=[phrase])
+    definitions = Definitions(definitions=[definition])
+
+    word = Word(word="onomatopoeia", definitions=definitions, phrases=[phrase])
 
     return WordDetailScreen(word=word)

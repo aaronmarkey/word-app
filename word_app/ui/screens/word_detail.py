@@ -1,6 +1,6 @@
 from textual.app import ComposeResult
-from textual.containers import Grid, Horizontal, HorizontalGroup, VerticalScroll
-from textual.widgets import Button, Collapsible, Header, Footer, Label
+from textual.containers import VerticalScroll
+from textual.widgets import Button, Collapsible, Footer, Header, Label
 
 from pydantic import BaseModel
 
@@ -102,24 +102,33 @@ class WordDetailScreen(WAScreen):
 
     def _compose_content(self) -> ComposeResult:
         all_sections: list[Collapsible] = []
-        if self._word.definitions:
-            contents: Horizontal
-            for definition in self._word.definitions:
-                contents = Horizontal(
+        if self._word.definitions.has_value:
+            labels = []
+
+            for (
+                part,
+                details,
+            ) in self._word.definitions.by_part_of_speech.items():
+                labels.append(
                     Label(
-                        f"[i]{definition.part_of_speech}[/]: ",
+                        f"[i]{part}[/]: ",
                         classes="collapsible--pos",
-                    ),
-                    Label(definition.text, classes="collapsible--definition"),
+                    )
                 )
+                for idx, definition in enumerate(details):
+                    text = f"[b]{idx + 1}[/]) {definition.text}"
+                    labels.append(
+                        Label(text, classes="collapsible--definition")
+                    )
             defc = Collapsible(
-                contents,
+                *labels,
                 title=DefinitionSection.title,
                 collapsed=False,
+                classes="word-detail--container",
             )
             all_sections.append(defc)
 
-        yield VerticalScroll(*all_sections)
+        yield VerticalScroll(*all_sections, classes="word-detail--content")
 
     def compose(self) -> ComposeResult:
         yield from self._compose_sidebar()

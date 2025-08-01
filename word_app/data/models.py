@@ -1,17 +1,41 @@
+from collections import defaultdict
+
 from pydantic import BaseModel
 
 
 class WordDetail(BaseModel):
-    pass
+    attribution: str = ""
+
+
+class WordDetailContainer(BaseModel):
+    @property
+    def has_value(self) -> bool:
+        return False
 
 
 class Definition(WordDetail):
-    attribution: str = ""
     part_of_speech: str
     text: str
 
 
-class Thesaurus(WordDetail):
+class Definitions(WordDetailContainer):
+    definitions: list[Definition] = []
+
+    @property
+    def has_value(self) -> bool:
+        return bool(self.definitions)
+
+    @property
+    def by_part_of_speech(self) -> dict[str, list[Definition]]:
+        defs: dict[str, list[Definition]] = defaultdict(list)
+
+        for d in self.definitions:
+            defs[d.part_of_speech.lower()].append(d)
+
+        return dict(defs)
+
+
+class Thesaurus(WordDetailContainer):
     pass
 
     @property
@@ -29,6 +53,6 @@ class Phrase(WordDetail):
 class Word(BaseModel):
     word: str
 
-    definitions: list[Definition] = []
+    definitions: Definitions = Definitions()
     phrases: list[Phrase] = []
     thesaurus: Thesaurus = Thesaurus()

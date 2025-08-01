@@ -41,9 +41,21 @@ SwitchWithLabel Label {
     border-title-style: bold;
 }
 
-Collapsible {
-    padding-right: 1;
-    & Label.collapsible--definition {
+Collapsible.word-detail--container {
+    border: solid $primary;
+    padding-bottom: 0;
+
+    CollapsibleTitle {
+        background: $block-cursor-background;
+    }
+
+    Label {
         width: 100%;
+
+        &.collapsible--definition {
+            padding-top: 1;
+            padding-left: 2;
+            padding-right: 2;
+        }
     }
 }

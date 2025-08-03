@@ -1129,6 +1129,16 @@ files = [
 test = ["coverage", "pytest", "pytest-cov"]
 
 [[package]]
+name = "wordnik-py3"
+version = "2.1.2"
+description = "Wordnik API for Python3"
+optional = false
+python-versions = "*"
+files = [
+    {file = "wordnik-py3-2.1.2.tar.gz", hash = "sha256:e4a55aeab9d546cb0b76afd6b853a60f96a5553542f89c29b4fcf69dbc237a8b"},
+]
+
+[[package]]
 name = "yarl"
 version = "1.20.1"
 description = "Yet another URL library"
@@ -1249,4 +1259,4 @@ propcache = ">=0.2.1"
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.11"
-content-hash = "0940c38a0bee7ffebdb2ad899e919d4dbc905f22de0978623a7322813d3283fa"
+content-hash = "d10469758abacc3b1c2bd14e50fc4d077841015f8aa80d273ad49b4494bf4b2d"

@@ -49,13 +49,24 @@ Collapsible.word-detail--container {
         background: $block-cursor-background;
     }
 
-    Label {
-        width: 100%;
-
+    HorizontalGroup {
         &.collapsible--definition {
-            padding-top: 1;
             padding-left: 2;
             padding-right: 2;
         }
+
+        Label.text {
+            margin-left: 1;
+            width: 100%;
+        }
+    }
+
+    ItemGrid {
+        padding-left: 2;
+    }
+
+    Rule {
+        margin-bottom: 1;
+        margin-top: 1;
     }
 }

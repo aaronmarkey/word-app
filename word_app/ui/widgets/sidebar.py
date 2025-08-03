@@ -6,14 +6,14 @@ from word_app.ui.constants import BOUND_KEY, TOOLTIP_ICON
 
 
 def SidebarButton(
-    text: str, *, desc: str = "", key_binding: str = ""
+    text: str, *, desc: str = "", key_binding: str = "", **kwargs
 ) -> Button:
     if key_binding:
         text = f"{BOUND_KEY.format(key=key_binding)} {text}"
     if desc:
         text += f" {TOOLTIP_ICON}"
 
-    button = Button(text, variant="primary", compact=True)
+    button = Button(text, variant="primary", compact=True, **kwargs)
 
     if desc:
         button.tooltip = desc

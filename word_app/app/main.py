@@ -67,7 +67,7 @@ class WordApp(App):
         )
 
     def action_push_word(self) -> None:
-        self.push_screen(example_word_screen())
+        self.push_screen(example_word_screen(self.ctx.conf))
 
     # My Functions
     def assemble_settings_screen(self) -> SettingsScreen:

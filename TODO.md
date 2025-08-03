@@ -31,16 +31,16 @@ For exact word information.
 ## Word Details Page
 - [ ] Every non-UI word on the details page is clickable.
 - [ ] Sidebar
-  - [ ] Buttons go to the relevant word information. "Definitions", "Thesaurus", etc.
+  - [x] Buttons go to the relevant word information. "Definitions", "Thesaurus", etc.
   - [x] Vertical scrolling.
   - [ ] Subclass Button to style properly based on section type.
 - [ ] Sections
   - [x] Collapsible sections
-  - [ ] Section keybindings - Numbers, 1 through 9, by order of section, number always same for section.
+  - [x] Section keybindings - Numbers, 1 through 9, by order of section, number always same for section.
   - [ ] Sections are disabled, collapsed, and moved to the bottom of the screen if section is empty.
 
 ### Keybindings
-- [ ] Section keybindings - Numbers, 1 through 9, by order of section, number always same for section.
+- [x] Section keybindings - Numbers, 1 through 9, by order of section, number always same for section.
 
 
 

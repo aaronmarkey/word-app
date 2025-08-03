@@ -35,12 +35,26 @@ class Definitions(WordDetailContainer):
         return dict(defs)
 
 
+class Nym(WordDetail):
+    type: str
+    text: str
+
+
 class Thesaurus(WordDetailContainer):
-    pass
+    nyms: list[Nym] = []
 
     @property
-    def has_data(self) -> bool:
-        return False
+    def has_value(self) -> bool:
+        return bool(self.nyms)
+
+    @property
+    def by_type(self) -> dict[str, list[Nym]]:
+        nyms: dict[str, list[Nym]] = defaultdict(list)
+
+        for n in self.nyms:
+            nyms[n.type.lower()].append(n)
+
+        return dict(nyms)
 
 
 class Phrase(WordDetail):

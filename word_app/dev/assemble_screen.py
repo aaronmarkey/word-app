@@ -1,5 +1,5 @@
 from word_app.data.models import Word
-from word_app.ui.screens import WordDetailScreen
+from word_app.ui.screens.word_detail import WordDetailScreen
 
 from word_app.data.services.wordnik import WordnikService, create_wordnik_client
 

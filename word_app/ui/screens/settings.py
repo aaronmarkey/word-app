@@ -1,6 +1,5 @@
 from typing import ClassVar
 
-from textual import on
 from textual.app import ComposeResult
 from textual.containers import VerticalGroup
 from textual.widgets import Footer, Header, Input, Switch
@@ -39,21 +38,14 @@ class SettingsScreen(WAScreen):
     BINDINGS = [POP_SCREEN.binding]
     TITLE = WA_ICON + " " + WA_TITLE
 
-    def __init__(
-        self, *, app_conf: AppConf, data_sources: list[DataSource]
-    ) -> None:
-        super().__init__()
-        self._app_conf = app_conf
-        self._data_sources = data_sources
-
     def _compose_data_sources_section(self) -> list[SwitchWithLabel]:
         # Get length of longest label name, to align labels properly.
-        label_length = [len(ds.label_name) for ds in self._data_sources]
+        label_length = [len(ds.label_name) for ds in self.app.ctx.data_sources]
         longest_name = max(label_length)
 
         widgets: list[SwitchWithLabel] = []
-        for ds in self._data_sources:
-            if ds_conf := getattr(self._app_conf.ds, ds.id, None):
+        for ds in self.app.ctx.data_sources:
+            if ds_conf := getattr(self.app.ctx.conf.ds, ds.id, None):
                 widget = (
                     SwitchWithLabel(
                         label_text=ds.label_name,
@@ -82,6 +74,7 @@ class SettingsScreen(WAScreen):
 
         return widgets
 
+    # Base Class Methods
     def compose(self) -> ComposeResult:
         h = Header(icon="")
         h.disabled = True
@@ -95,16 +88,15 @@ class SettingsScreen(WAScreen):
 
         yield Footer()
 
-    @on(Switch.Changed)
-    def switch_changed(self, event: Switch.Changed) -> None:
-        event.stop()
-        _id = event.switch.id or ""
-        ds, prop = WidgetId.parse(_id)
-        self._app_conf.update_ds_by_name(ds, prop, event.switch.value)
-
-    @on(Input.Changed)
-    def input_changed(self, event: Input.Changed) -> None:
+    # Event Handlers
+    def on_input_changed(self, event: Input.Changed) -> None:
         event.stop()
         _id = event.input.id or ""
         ds, prop = WidgetId.parse(_id)
-        self._app_conf.update_ds_by_name(ds, prop, event.input.value)
+        self.app.ctx.conf.update_ds_by_name(ds, prop, event.input.value)
+
+    def on_switch_changed(self, event: Switch.Changed) -> None:
+        event.stop()
+        _id = event.switch.id or ""
+        ds, prop = WidgetId.parse(_id)
+        self.app.ctx.conf.update_ds_by_name(ds, prop, event.switch.value)

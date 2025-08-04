@@ -5,17 +5,24 @@ from pydantic import BaseModel
 
 class WordDetail(BaseModel):
     attribution: str = ""
+    type: str
+    text: str
 
 
 class WordDetailContainer(BaseModel):
+    source: str = ""
+
     @property
     def has_value(self) -> bool:
         return False
 
+    @property
+    def by_type(self) -> dict[str, list[WordDetail]]:
+        return {}
+
 
 class Definition(WordDetail):
-    part_of_speech: str
-    text: str
+    pass
 
 
 class Definitions(WordDetailContainer):
@@ -26,18 +33,17 @@ class Definitions(WordDetailContainer):
         return bool(self.definitions)
 
     @property
-    def by_part_of_speech(self) -> dict[str, list[Definition]]:
-        defs: dict[str, list[Definition]] = defaultdict(list)
+    def by_type(self) -> dict[str, list[WordDetail]]:
+        defs: dict[str, list[WordDetail]] = defaultdict(list)
 
         for d in self.definitions:
-            defs[d.part_of_speech.lower()].append(d)
+            defs[d.type.lower()].append(d)
 
         return dict(defs)
 
 
 class Nym(WordDetail):
-    type: str
-    text: str
+    pass
 
 
 class Thesaurus(WordDetailContainer):
@@ -48,8 +54,8 @@ class Thesaurus(WordDetailContainer):
         return bool(self.nyms)
 
     @property
-    def by_type(self) -> dict[str, list[Nym]]:
-        nyms: dict[str, list[Nym]] = defaultdict(list)
+    def by_type(self) -> dict[str, list[WordDetail]]:
+        nyms: dict[str, list[WordDetail]] = defaultdict(list)
 
         for n in self.nyms:
             nyms[n.type.lower()].append(n)
@@ -57,16 +63,16 @@ class Thesaurus(WordDetailContainer):
         return dict(nyms)
 
 
-class Phrase(WordDetail):
-    tokens: list[str]
+# class Phrase(WordDetail):
+#     tokens: list[str]
 
-    def __str__(self):
-        return " ".join(self.tokens)
+#     def __str__(self):
+#         return " ".join(self.tokens)
 
 
 class Word(BaseModel):
     word: str
 
     definitions: Definitions = Definitions()
-    phrases: list[Phrase] = []
+    # phrases: list[Phrase] = []
     thesaurus: Thesaurus = Thesaurus()

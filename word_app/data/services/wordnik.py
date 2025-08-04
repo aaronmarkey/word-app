@@ -1,4 +1,4 @@
-from enum import StrEnum
+from dataclasses import dataclass
 
 from wordnik import *
 
@@ -15,6 +15,12 @@ def create_wordnik_client(
 ) -> WordApi.WordApi:
     client = swagger.ApiClient(api_key, api_url)
     return WordApi.WordApi(client)
+
+
+@dataclass
+class WordnikSourceDictionary:
+    api_value: str
+    title: str
 
 
 class WordnikTransformer:
@@ -37,7 +43,7 @@ class WordnikTransformer:
     def definition(cls, response) -> Definition | None:
         if response.partOfSpeech and response.text:
             text = cls.html_to_tag(response.text)
-            return Definition(part_of_speech=response.partOfSpeech, text=text)
+            return Definition(type=response.partOfSpeech, text=text)
         return None
 
     @classmethod
@@ -56,12 +62,15 @@ class WordnikTransformer:
         return nyms
 
 
+AmericanHeritage = WordnikSourceDictionary(
+    api_value="ahd-5",
+    title="The American Heritage® Dictionary of the English Language, 5th Edition",
+)
+
+
 class WordnikService:
     DEFINITION_LIMIT: int = 500
     THESAURUS_LIMIT: int = 1_000
-
-    class SourceDictionary(StrEnum):
-        AMERICAN_HERITAGE = "ahd-5"
 
     def __init__(self, client: WordApi.WordApi) -> None:
         self.client = client
@@ -71,15 +80,15 @@ class WordnikService:
         word: str,
         *,
         limit: int = DEFINITION_LIMIT,
-        source_dictionary: SourceDictionary = SourceDictionary.AMERICAN_HERITAGE,
+        source_dictionary: WordnikSourceDictionary = AmericanHeritage,
     ) -> Definitions:
         try:
             responses = self.client.getDefinitions(
                 word,
-                sourceDictionaries=source_dictionary,
+                sourceDictionaries=source_dictionary.api_value,
                 limit=limit,
             )
-            definitions = Definitions()
+            definitions = Definitions(source=source_dictionary.title)
             for resp in responses:
                 if d := WordnikTransformer.definition(resp):
                     definitions.definitions.append(d)

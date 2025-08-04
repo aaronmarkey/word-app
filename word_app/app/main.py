@@ -5,15 +5,14 @@ import os
 from dataclasses import dataclass
 from typing import Iterable
 
-from textual.app import App, ComposeResult, SystemCommand
+from textual.app import App, SystemCommand
 from textual.screen import Screen
-from textual.widgets import Footer
 
 from word_app.app.conf import AppConf
 from word_app.data.sources import DataSource
-from word_app.dev.assemble_screen import example_word_screen
 from word_app.io import ApplicationPath
-from word_app.ui.screens import SettingsScreen, WordDetailScreen
+from word_app.ui.screens.home import HomeScreen
+from word_app.ui.screens.settings import SettingsScreen
 
 
 @dataclass
@@ -24,11 +23,8 @@ class WordAppContext:
 
 
 class WordApp(App):
-    BINDINGS = [
-        (SettingsScreen.WA_BINDING, "push_settings", SettingsScreen.WA_TITLE),
-        (WordDetailScreen.WA_BINDING, "push_word", WordDetailScreen.WA_TITLE),
-    ]
     CSS_PATH = "main.css"
+    SCREENS = {"home": HomeScreen}
     TOOLTIP_DELAY = 0.2
 
     def __init__(self, *args, **kwargs) -> None:
@@ -48,33 +44,12 @@ class WordApp(App):
         yield SystemCommand(
             SettingsScreen.WA_TITLE,
             SettingsScreen.WA_DESCRIPTION,
-            (
-                lambda: self.push_screen(
-                    self.assemble_settings_screen(),
-                    wait_for_dismiss=False,
-                )
-            ),
+            lambda: self.push_screen(SettingsScreen(), wait_for_dismiss=False),
             discover=True,
         )
 
-    def compose(self) -> ComposeResult:
-        yield Footer()
-
-    # Dynamically Generated Methods.
-    def action_push_settings(self) -> None:
-        self.push_screen(
-            self.assemble_settings_screen(), wait_for_dismiss=False
-        )
-
-    def action_push_word(self) -> None:
-        self.push_screen(example_word_screen(self.ctx.conf))
-
-    # My Functions
-    def assemble_settings_screen(self) -> SettingsScreen:
-        return SettingsScreen(
-            app_conf=self.ctx.conf,
-            data_sources=self.ctx.data_sources,
-        )
+    def on_mount(self) -> None:
+        self.push_screen("home")
 
 
 def create_app(*, ctx: WordAppContext) -> WordApp:

@@ -2,6 +2,11 @@ from dataclasses import dataclass
 
 
 @dataclass
+class FormattableLexicon:
+    ATTRIBUTION: str
+
+
+@dataclass
 class Lexicon:
     BACK: str
 
@@ -18,10 +23,14 @@ class Lexicon:
 
     SIDEBAR_DEFINITIONS_TITLE: str
     SIDEBAR_DEFINITIONS_DESCRIPTION: str
+    SIDEBAR_RELATED_TITLE: str
+    SIDEBAR_RELATED_DESCRIPTION: str
     SIDEBAR_THESAURUS_TITLE: str
     SIDEBAR_THESAURUS_DESCRIPTION: str
     SIDEBAR_PHRASES_TITLE: str
     SIDEBAR_PHRASES_DESCRIPTION: str
+
+    WD_CLOSE_ALL_SECTIONS: str
 
 
 EN_LANG = Lexicon(
@@ -41,8 +50,12 @@ EN_LANG = Lexicon(
     SETTINGS_SCREEN_TITLE="Settings",
     SIDEBAR_DEFINITIONS_TITLE="Definitions",
     SIDEBAR_DEFINITIONS_DESCRIPTION="Definitions of the word.",
+    SIDEBAR_RELATED_DESCRIPTION="Related words and word forms.",
+    SIDEBAR_RELATED_TITLE="Related",
     SIDEBAR_THESAURUS_TITLE="Thesaurus",
     SIDEBAR_THESAURUS_DESCRIPTION="Synonyms, antonyms, hyponyms, and hypernyms of the word.",
     SIDEBAR_PHRASES_TITLE="Examples",
     SIDEBAR_PHRASES_DESCRIPTION="Example phrases containing the word.",
+    WD_CLOSE_ALL_SECTIONS="Collapse All",
 )
+EN_LANG_FORMATS = FormattableLexicon(ATTRIBUTION="from {attr}.")

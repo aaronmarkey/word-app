@@ -65,6 +65,11 @@ Collapsible.word-detail--container {
         padding-left: 2;
     }
 
+    Label.collapsible--attribution {
+        padding-bottom: 1;
+        width: 100%;
+    }
+
     Rule {
         margin-bottom: 1;
         margin-top: 1;

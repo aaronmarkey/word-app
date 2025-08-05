@@ -1,17 +1,20 @@
 from word_app.data.models import Word
+from word_app.data.wordnik.service import (
+    WordnikDataService,
+    create_wordnik_client,
+)
+from word_app.dev import fake
 from word_app.ui.screens.word_detail import WordDetailScreen
-
-from word_app.data.services.wordnik import WordnikService, create_wordnik_client
 
 
 def example_word_screen(conf) -> WordDetailScreen:
-    wnc = create_wordnik_client(conf.ds.wordnik.api_key)
-    service = WordnikService(wnc)
-    word = "paper"
+    # w = "paper"
+    # wnc = create_wordnik_client(conf.ds.wordnik.api_key)
+    # service = WordnikDataService(wnc)
+    # definitions = service.get_word_definitions(w)
+    # thesaurus = service.get_word_thesaurus(w)
+    # word = Word(word=word, definitions=definitions, thesaurus=thesaurus)
 
-    definitions = service.get_word_definitions(word)
-    thesaurus = service.get_word_thesaurus(word)
-
-    word = Word(word=word, definitions=definitions, thesaurus=thesaurus)
+    word = fake.WordFactory()
 
     return WordDetailScreen(word=word)

@@ -16,6 +16,7 @@ wordnik-py3 = "^2.1.2"
 [tool.poetry.group.dev.dependencies]
 ruff = "^0.12.5"
 textual-dev = "^1.7.0"
+factory-boy = "^3.3.3"
 
 [tool.ruff]
 line-length = 80

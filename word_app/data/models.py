@@ -2,10 +2,12 @@ from collections import defaultdict
 
 from pydantic import BaseModel
 
+from word_app.data.grammar import Grammar
+
 
 class WordDetail(BaseModel):
     attribution: str = ""
-    type: str
+    type: Grammar
     text: str
 
 
@@ -17,7 +19,7 @@ class WordDetailContainer(BaseModel):
         return False
 
     @property
-    def by_type(self) -> dict[str, list[WordDetail]]:
+    def by_type(self) -> dict[Grammar, list[WordDetail]]:
         return {}
 
 
@@ -33,11 +35,11 @@ class Definitions(WordDetailContainer):
         return bool(self.definitions)
 
     @property
-    def by_type(self) -> dict[str, list[WordDetail]]:
-        defs: dict[str, list[WordDetail]] = defaultdict(list)
+    def by_type(self) -> dict[Grammar, list[WordDetail]]:
+        defs: dict[Grammar, list[WordDetail]] = defaultdict(list)
 
         for d in self.definitions:
-            defs[d.type.lower()].append(d)
+            defs[d.type].append(d)
 
         return dict(defs)
 
@@ -54,25 +56,17 @@ class Thesaurus(WordDetailContainer):
         return bool(self.nyms)
 
     @property
-    def by_type(self) -> dict[str, list[WordDetail]]:
-        nyms: dict[str, list[WordDetail]] = defaultdict(list)
+    def by_type(self) -> dict[Grammar, list[WordDetail]]:
+        nyms: dict[Grammar, list[WordDetail]] = defaultdict(list)
 
         for n in self.nyms:
-            nyms[n.type.lower()].append(n)
+            nyms[n.type].append(n)
 
         return dict(nyms)
-
-
-# class Phrase(WordDetail):
-#     tokens: list[str]
-
-#     def __str__(self):
-#         return " ".join(self.tokens)
 
 
 class Word(BaseModel):
     word: str
 
     definitions: Definitions = Definitions()
-    # phrases: list[Phrase] = []
     thesaurus: Thesaurus = Thesaurus()

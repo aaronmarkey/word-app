@@ -6,7 +6,19 @@ from textual.widgets import Button, Collapsible, Footer, Header, Label, Rule
 
 from pydantic import BaseModel
 
-from word_app.data.language import WordDetailType
+from word_app.data.grammar import (
+    Antonym,
+    Form,
+    Grammar,
+    Hypernym,
+    Hyponym,
+    InflectedForm,
+    Rhyme,
+    Synonym,
+    Variant,
+    VerbForm,
+    VerbStem,
+)
 from word_app.data.models import Word, WordDetailContainer
 from word_app.ext import WAScreen
 from word_app.lex import EN_LANG, EN_LANG_FORMATS
@@ -45,7 +57,7 @@ RelatedSection = WordDetailSection(
 PhraseSection = WordDetailSection(
     title=EN_LANG.SIDEBAR_PHRASES_TITLE,
     desc=EN_LANG.SIDEBAR_PHRASES_DESCRIPTION,
-    key_binding="3",
+    key_binding="4",
     css_class="phrase",
 )
 
@@ -85,7 +97,7 @@ class WordDetailScreen(WAScreen):
         *,
         container: WordDetailContainer,
         section: WordDetailSection,
-        allowed_types: list[WordDetailType],
+        allowed_types: list[Grammar],
     ) -> Collapsible | None:
         # Allowed Types and order they are displayed.
         if container.has_value:
@@ -104,7 +116,7 @@ class WordDetailScreen(WAScreen):
                     # Label for the section.
                     content.append(
                         Label(
-                            f"[i][u]{allowed.value} ({len(nyms)})[/][/]:",
+                            f"[i][u]{allowed.title_display} ({len(nyms)})[/][/]:",
                             classes="collapsible--pos",
                         )
                     )
@@ -164,20 +176,21 @@ class WordDetailScreen(WAScreen):
                     classes="collapsible--attribution",
                 )
             )
-
+            by_type = self._word.definitions.by_type
             i = 0
-            keys = self._word.definitions.by_type.keys()
-            values = self._word.definitions.by_type.values()
-            for (
-                part,
-                details,
-            ) in zip(keys, values):
+            keys = sorted(
+                [key for key in by_type.keys()],
+                key=lambda k: k.title_display.lower(),
+            )
+
+            for part in keys:
                 labels.append(
                     Label(
-                        f"[i][u]{part}[/][/]: ",
+                        f"[i][u]{part.title_display}[/][/]: ",
                         classes="collapsible--pos",
                     )
                 )
+                details = by_type.get(part, [])
                 for j, definition in enumerate(details):
                     horizontal = HorizontalGroup(
                         Label(f"[b]{j + 1}.[/]"),
@@ -205,12 +218,12 @@ class WordDetailScreen(WAScreen):
             container=self._word.thesaurus,
             section=RelatedSection,
             allowed_types=[
-                WordDetailType.form,
-                WordDetailType.inflected_form,
-                WordDetailType.rhyme,
-                WordDetailType.variant,
-                WordDetailType.verb_form,
-                WordDetailType.verb_stem,
+                Form,
+                InflectedForm,
+                Rhyme,
+                Variant,
+                VerbForm,
+                VerbStem,
             ],
         )
 
@@ -271,10 +284,10 @@ class WordDetailScreen(WAScreen):
             container=self._word.thesaurus,
             section=ThesaurusSection,
             allowed_types=[
-                WordDetailType.synonym,
-                WordDetailType.antonym,
-                WordDetailType.hyponym,
-                WordDetailType.hypernym,
+                Synonym,
+                Antonym,
+                Hypernym,
+                Hyponym,
             ],
         )
 

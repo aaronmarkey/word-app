@@ -1,0 +1,33 @@
+from textual.theme import Theme
+
+DarkTheme = Theme(
+    name="Dark Theme",
+    primary="#D8D8D8",
+    secondary="#E0E0E0",
+    accent="#ffa62b",
+    warning="#ffa62b",
+    error="#ba3c5b",
+    success="#4EBF71",
+    foreground="#e0e0e0",
+    variables={
+        "footer-key-foreground": "#F2AA49",  # Orange
+    },
+)
+
+LightTheme = Theme(
+    name="Light Theme",
+    primary="#1E1E1E",
+    secondary="#121212",
+    accent="#FFA62B",
+    warning="#FFA62B",
+    error="#BA3C5B",
+    success="#4EBF71",
+    surface="#D8D8D8",
+    panel="#D0D0D0",
+    background="#E0E0E0",
+    foreground="#121212",
+    dark=False,
+    variables={
+        "footer-key-foreground": "#0178D4",  # Blue
+    },
+)

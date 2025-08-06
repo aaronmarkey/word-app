@@ -50,6 +50,7 @@ Collapsible.word-detail--container {
 
     CollapsibleTitle {
         background: $block-cursor-background;
+        color: $block-cursor-foreground;
     }
 
     HorizontalGroup {

@@ -1,8 +1,18 @@
+from statistics import mean
+
 from textual.app import ComposeResult
 from textual.containers import HorizontalGroup, ItemGrid, VerticalScroll
 from textual.events import Key
 from textual.widget import Widget
-from textual.widgets import Button, Collapsible, Footer, Header, Label, Rule
+from textual.widgets import (
+    Button,
+    Collapsible,
+    Footer,
+    Header,
+    Label,
+    Rule,
+    Sparkline,
+)
 
 from pydantic import BaseModel
 
@@ -22,6 +32,7 @@ from word_app.data.grammar import (
 from word_app.data.models import Word, WordDetailContainer
 from word_app.ext import WAScreen
 from word_app.lex import EN_LANG, EN_LANG_FORMATS
+from word_app.ui.constants import TOOLTIP_ICON
 from word_app.ui.navigation.common import POP_SCREEN
 from word_app.ui.widgets import Sidebar, SidebarButton
 
@@ -33,31 +44,45 @@ class WordDetailSection(BaseModel):
     css_class: str
 
 
+InformationSection = WordDetailSection(
+    title=EN_LANG.SIDEBAR_INFO_TITLE,
+    desc=EN_LANG.SIDEBAR_INFO_DESCRIPTION,
+    key_binding="1",
+    css_class="information",
+)
+
 DefinitionSection = WordDetailSection(
     title=EN_LANG.SIDEBAR_DEFINITIONS_TITLE,
     desc=EN_LANG.SIDEBAR_DEFINITIONS_DESCRIPTION,
-    key_binding="1",
+    key_binding="2",
     css_class="definition",
 )
 
 ThesaurusSection = WordDetailSection(
     title=EN_LANG.SIDEBAR_THESAURUS_TITLE,
     desc=EN_LANG.SIDEBAR_THESAURUS_DESCRIPTION,
-    key_binding="2",
+    key_binding="3",
     css_class="thesaurus",
 )
 
 RelatedSection = WordDetailSection(
     title=EN_LANG.SIDEBAR_RELATED_TITLE,
     desc=EN_LANG.SIDEBAR_RELATED_DESCRIPTION,
-    key_binding="3",
+    key_binding="4",
     css_class="related",
+)
+
+ExampleSection = WordDetailSection(
+    title=EN_LANG.SIDEBAR_EXAMPLES_TITLE,
+    desc=EN_LANG.SIDEBAR_EXAMPLES_DESCRIPTION,
+    key_binding="5",
+    css_class="example",
 )
 
 PhraseSection = WordDetailSection(
     title=EN_LANG.SIDEBAR_PHRASES_TITLE,
     desc=EN_LANG.SIDEBAR_PHRASES_DESCRIPTION,
-    key_binding="4",
+    key_binding="6",
     css_class="phrase",
 )
 
@@ -151,32 +176,28 @@ class WordDetailScreen(WAScreen):
             return con
         return None
 
-    def _compose_content(self) -> ComposeResult:
-        all_sections: list[Collapsible] = []
-
-        if defc := self._compose_definitions():
-            all_sections.append(defc)
-        if thec := self._compose_thesaurus():
-            all_sections.append(thec)
-        if relc := self._compose_related():
-            all_sections.append(relc)
-
-        yield VerticalScroll(*all_sections, classes="word-detail--content")
-
-    def _compose_definitions(self) -> Collapsible | None:
-        if self._word.definitions.has_value:
+    def _compose_collapsible_list(
+        self,
+        *,
+        container: WordDetailContainer,
+        section: WordDetailSection,
+        include_attribution: bool = True,
+    ) -> Collapsible | None:
+        if container.has_value:
             labels = []
 
-            attribution_text = EN_LANG_FORMATS.ATTRIBUTION.format(
-                attr=self._word.definitions.source
-            )
-            labels.append(
-                Label(
-                    f"[i][u]{attribution_text}[/][/]",
-                    classes="collapsible--attribution",
+            if include_attribution:
+                attribution_text = EN_LANG_FORMATS.ATTRIBUTION.format(
+                    attr=container.source
                 )
-            )
-            by_type = self._word.definitions.by_type
+                labels.append(
+                    Label(
+                        f"[i][u]{attribution_text}[/][/]",
+                        classes="collapsible--attribution",
+                    )
+                )
+
+            by_type = container.by_type
             i = 0
             keys = sorted(
                 [key for key in by_type.keys()],
@@ -191,11 +212,14 @@ class WordDetailScreen(WAScreen):
                     )
                 )
                 details = by_type.get(part, [])
-                for j, definition in enumerate(details):
+                for j, detail in enumerate(details):
                     horizontal = HorizontalGroup(
                         Label(f"[b]{j + 1}.[/]"),
-                        Label(definition.text, classes="text"),
-                        classes="collapsible--definition",
+                        Label(detail.text, classes="text"),
+                        classes=(
+                            "collapsible--list "
+                            f"collapsible--{section.css_class}"
+                        ),
                     )
                     labels.append(horizontal)
 
@@ -205,13 +229,117 @@ class WordDetailScreen(WAScreen):
 
             con = Collapsible(
                 *labels,
-                title=DefinitionSection.title,
+                title=section.title,
                 collapsed=False,
                 classes="word-detail--container",
             )
-            self._active_sections[DefinitionSection.key_binding] = con
+            self._active_sections[section.key_binding] = con
             return con
         return None
+
+    def _compose_content(self) -> ComposeResult:
+        all_sections: list[Collapsible] = []
+
+        section_callables = [
+            self._compose_information,
+            self._compose_definitions,
+            self._compose_thesaurus,
+            self._compose_related,
+            self._compose_examples,
+            self._compose_phrases,
+        ]
+
+        for sc in section_callables:
+            if section := sc():
+                all_sections.append(section)
+
+        yield VerticalScroll(*all_sections, classes="word-detail--content")
+
+    def _compose_definitions(self) -> Collapsible | None:
+        return self._compose_collapsible_list(
+            container=self._word.definitions,
+            section=DefinitionSection,
+            include_attribution=True,
+        )
+
+    def _compose_examples(self) -> Collapsible | None:
+        return self._compose_collapsible_list(
+            container=self._word.examples,
+            section=ExampleSection,
+            include_attribution=False,
+        )
+
+    def _compose_information(self) -> Collapsible | None:
+        elements: list[Widget] = []
+
+        if self._word.syllables.has_value:
+            elements.append(
+                Label(
+                    f"[i][u]{EN_LANG.SYLLABLES}[/][/]: "
+                    f"{self._word.syllables.as_string}",
+                    classes="syllables",
+                )
+            )
+
+        if self._word.etymologies.has_value:
+            label_css = "collapsible--pos"
+            if self._word.syllables.has_value:
+                label_css += " mt-1"
+            elements.append(
+                Label(
+                    f"[i][u]{EN_LANG.ETYMOLOGIES}[/][/]: ",
+                    classes=label_css,
+                )
+            )
+
+            for idx, ety in enumerate(self._word.etymologies.etymologies):
+                horizontal = HorizontalGroup(
+                    Label(f"[b]{idx + 1}.[/]"),
+                    Label(ety.text, classes="text"),
+                    classes=(
+                        "collapsible--list "
+                        f"collapsible--{InformationSection.css_class}"
+                    ),
+                )
+                elements.append(horizontal)
+
+        if self._word.frequency_graph.has_value:
+            in_order = self._word.frequency_graph.in_order
+            label_css = "collapsible--pos"
+            if self._word.etymologies.has_value:
+                label_css += " mt-1"
+                flabel = Label(
+                    f"[i][u]{EN_LANG.FREQUENCY} {TOOLTIP_ICON}[/][/]: ",
+                    classes=label_css,
+                )
+                flabel.tooltip = EN_LANG_FORMATS.FREQUENCY_TOOLTIP.format(
+                    start=in_order[0].start,
+                    end=in_order[-1].end,
+                )
+                elements.append(flabel)
+                elements.append(
+                    Sparkline(
+                        [freq.value for freq in in_order], summary_function=mean
+                    )
+                )
+
+        if elements:
+            con = Collapsible(
+                *elements,
+                title=InformationSection.title,
+                collapsed=False,
+                classes="word-detail--container",
+            )
+            self._active_sections[InformationSection.key_binding] = con
+            return con
+        return None
+
+    def _compose_phrases(self) -> Collapsible | None:
+        return self._compose_collapsible_list(
+            container=self._word.phrases,
+            section=PhraseSection,
+            include_attribution=False,
+        )
 
     def _compose_related(self) -> Collapsible | None:
         return self._compose_collapsible_grid(
@@ -231,6 +359,14 @@ class WordDetailScreen(WAScreen):
         active_buttons: list[Button] = []
         inactive_buttons: list[Button] = []
 
+        infb = SidebarButton(
+            InformationSection.title,
+            desc=InformationSection.desc,
+            key_binding=InformationSection.key_binding,
+            id=self.SidebarButtonManager.make_button_id(
+                InformationSection.key_binding
+            ),
+        )
         defb = SidebarButton(
             DefinitionSection.title,
             desc=DefinitionSection.desc,
@@ -255,6 +391,33 @@ class WordDetailScreen(WAScreen):
                 RelatedSection.key_binding
             ),
         )
+        exab = SidebarButton(
+            ExampleSection.title,
+            desc=ExampleSection.desc,
+            key_binding=ExampleSection.key_binding,
+            id=self.SidebarButtonManager.make_button_id(
+                ExampleSection.key_binding
+            ),
+        )
+        phrb = SidebarButton(
+            PhraseSection.title,
+            desc=PhraseSection.desc,
+            key_binding=PhraseSection.key_binding,
+            id=self.SidebarButtonManager.make_button_id(
+                PhraseSection.key_binding
+            ),
+        )
+
+        if (
+            self._word.etymologies.has_value
+            or self._word.frequency_graph.has_value
+            or self._word.syllables.has_value
+        ):
+            active_buttons.append(infb)
+        else:
+            infb.disabled = True
+            infb.tooltip = None
+            inactive_buttons.append(infb)
 
         if self._word.definitions.has_value:
             active_buttons.append(defb)
@@ -273,6 +436,20 @@ class WordDetailScreen(WAScreen):
             relb.disabled = True
             relb.tooltip = None
             inactive_buttons.append(relb)
+
+        if self._word.examples.has_value:
+            active_buttons.append(exab)
+        else:
+            exab.disabled = True
+            exab.tooltip = None
+            inactive_buttons.append(exab)
+
+        if self._word.phrases.has_value:
+            active_buttons.append(phrb)
+        else:
+            phrb.disabled = True
+            phrb.tooltip = None
+            inactive_buttons.append(phrb)
 
         yield Sidebar(
             active_buttons + inactive_buttons, classes="with-header with-footer"

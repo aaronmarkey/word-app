@@ -40,6 +40,9 @@ SwitchWithLabel Label {
     border-title-color: $secondary;
     border-title-style: bold;
 }
+.mt-1 {
+    margin-top: 1;
+}
 
 Collapsible.word-detail--container {
     border: solid $primary;
@@ -50,7 +53,7 @@ Collapsible.word-detail--container {
     }
 
     HorizontalGroup {
-        &.collapsible--definition {
+        &.collapsible--list {
             padding-left: 2;
             padding-right: 2;
         }
@@ -68,6 +71,10 @@ Collapsible.word-detail--container {
     Label.collapsible--attribution {
         padding-bottom: 1;
         width: 100%;
+    }
+
+    Sparkline {
+        margin-right: 2;
     }
 
     Rule {

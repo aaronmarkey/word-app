@@ -36,6 +36,8 @@ ProperNounPosessive = Grammar(title="proper noun posessive")
 Suffix = Grammar(title="suffix")
 VerbIntransitive = Grammar(title="verb intransitive")
 VerbTransitive = Grammar(title="verb transitive")
+Miscellaneous = Grammar(title="miscellaneous")
+Nothing = Grammar(title="nothing")
 
 Synonym = Grammar(title="synonym")
 Antonym = Grammar(title="antonym")
@@ -83,6 +85,8 @@ DICTIONARY_GRAMMARS = [
     Suffix,
     VerbIntransitive,
     VerbTransitive,
+    Miscellaneous,
+    Nothing,
 ]
 
 THESAURUS_GRAMMARS = [

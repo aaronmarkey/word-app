@@ -77,6 +77,16 @@ class WordApp(App):
             discover=True,
         )
 
+    def get_theme_variable_defaults(self) -> dict:
+        theme = get_theme(LightTheme, DarkTheme)
+
+        return {
+            "keyboard-action-foreground": theme.variables.get(
+                "keyboard-action-foreground"
+            )
+        }
+
+    # Event handlers.
     def on_mount(self) -> None:
         self.register_theme(DarkTheme)
         self.register_theme(LightTheme)

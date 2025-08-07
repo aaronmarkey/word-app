@@ -13,6 +13,7 @@ class Lexicon:
     ETYMOLOGIES: str
     FREQUENCY: str
     SYLLABLES: str
+    WORD: str
 
     DS_DATAMUSE_DESC: str
     DS_DATAMUSE_NAME: str
@@ -46,6 +47,7 @@ EN_LANG = Lexicon(
     ETYMOLOGIES="Etymologies",
     FREQUENCY="Frequency",
     SYLLABLES="Syllables",
+    WORD="Word",
     DS_DATAMUSE_DESC=(
         "Datamuse provides meta-information about words. "
         "For example: synonyms, related words."
@@ -55,7 +57,7 @@ EN_LANG = Lexicon(
         "Wordnik provides definitions, examples, synonyms, antonyms, and more."
     ),
     DS_WORDNIK_NAME="Wordnik",
-    INPUT_API_KEY_PLACEHOLDER="EnterAPI Key",
+    INPUT_API_KEY_PLACEHOLDER="Enter API Key",
     SETTINGS_SCREEN_DESC="Configure the application.",
     SETTINGS_SCREEN_SECTION_DS_TITLE="Data Sources",
     SETTINGS_SCREEN_TITLE="Settings",

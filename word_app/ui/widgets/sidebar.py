@@ -13,7 +13,7 @@ def SidebarButton(
     if desc:
         text += f" {TOOLTIP_ICON}"
 
-    button = Button(text, variant="primary", compact=True, **kwargs)
+    button = Button(text, variant="default", compact=False, **kwargs)
 
     if desc:
         button.tooltip = desc

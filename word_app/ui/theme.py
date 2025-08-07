@@ -10,7 +10,8 @@ DarkTheme = Theme(
     success="#4EBF71",
     foreground="#e0e0e0",
     variables={
-        "footer-key-foreground": "#F2AA49",  # Orange
+        "footer-key-foreground": "#3376CD",
+        "keyboard-action-foreground": "#3376CD",
     },
 )
 
@@ -28,6 +29,7 @@ LightTheme = Theme(
     foreground="#121212",
     dark=False,
     variables={
-        "footer-key-foreground": "#0178D4",  # Blue
+        "footer-key-foreground": "#3376CD",
+        "keyboard-action-foreground": "#3376CD",
     },
 )

@@ -1,8 +1,9 @@
 from statistics import mean
 
+import pyperclip
 from textual.app import ComposeResult
 from textual.containers import HorizontalGroup, ItemGrid, VerticalScroll
-from textual.events import Key
+from textual.events import Key, MouseDown, MouseEvent, MouseUp
 from textual.widget import Widget
 from textual.widgets import (
     Button,
@@ -34,7 +35,38 @@ from word_app.ext import WAScreen
 from word_app.lex import EN_LANG, EN_LANG_FORMATS
 from word_app.ui.constants import TOOLTIP_ICON
 from word_app.ui.navigation.common import POP_SCREEN
-from word_app.ui.widgets import Sidebar, SidebarButton
+from word_app.ui.widgets import Sidebar, SidebarButton, WALabel
+
+
+class ClickableSentence:
+    def __init__(self, sentence: str, *, action: str) -> None:
+        self._sentence = sentence
+        self._action = action
+
+    def _for_word(self, word: str) -> str:
+        allowed_non_alpha = {"-", "'", '"'}
+        sanitized = ""
+
+        for character in word:
+            if character.isalpha() or character in allowed_non_alpha:
+                sanitized += character
+
+        callable = f"screen.{self._action}('{sanitized}')"
+        new_word = f"[@click={callable}][u]{sanitized}[/][/]"
+
+        return word.replace(sanitized, new_word)
+
+    def _convert(self) -> str:
+        words = self._sentence.split(" ")
+        clickables: list[str] = []
+
+        for word in words:
+            clickables.append(self._for_word(word))
+
+        return "[u] [/]".join(clickables)
+
+    def __str__(self) -> str:
+        return self._convert()
 
 
 class WordDetailSection(BaseModel):
@@ -114,6 +146,8 @@ class WordDetailScreen(WAScreen):
         super().__init__()
         self._word = word
         self._active_sections: dict[str, Collapsible] = {}
+        self._current_click_event: MouseEvent | None = None
+
         self.title = f"{self.WA_ICON}  {self._word.word}"
 
     # Composition
@@ -140,9 +174,10 @@ class WordDetailScreen(WAScreen):
 
                     # Label for the section.
                     content.append(
-                        Label(
-                            f"[i][u]{allowed.title_display} ({len(nyms)})[/][/]:",
+                        WALabel(
+                            f"{allowed.title_display} ({len(nyms)}):",
                             classes="collapsible--pos",
+                            styles="ib",
                         )
                     )
 
@@ -152,7 +187,8 @@ class WordDetailScreen(WAScreen):
                     for nym in nyms:
                         if len(nym.text) > longest_word:
                             longest_word = len(nym.text)
-                        items.append(Label(nym.text))
+                        lt = ClickableSentence(nym.text, action="click_word")
+                        items.append(Label(str(lt)))
                     # Everything goes in an item grid for dynamic layout.
                     content.append(
                         ItemGrid(
@@ -191,9 +227,10 @@ class WordDetailScreen(WAScreen):
                     attr=container.source
                 )
                 labels.append(
-                    Label(
-                        f"[i][u]{attribution_text}[/][/]",
+                    WALabel(
+                        attribution_text,
                         classes="collapsible--attribution",
+                        styles="ib",
                     )
                 )
 
@@ -206,16 +243,25 @@ class WordDetailScreen(WAScreen):
 
             for part in keys:
                 labels.append(
-                    Label(
-                        f"[i][u]{part.title_display}[/][/]: ",
+                    WALabel(
+                        part.title_display,
                         classes="collapsible--pos",
+                        separator=": ",
+                        styles="ib",
                     )
                 )
                 details = by_type.get(part, [])
                 for j, detail in enumerate(details):
                     horizontal = HorizontalGroup(
                         Label(f"[b]{j + 1}.[/]"),
-                        Label(detail.text, classes="text"),
+                        Label(
+                            str(
+                                ClickableSentence(
+                                    detail.text, action="click_word"
+                                )
+                            ),
+                            classes="text",
+                        ),
                         classes=(
                             "collapsible--list "
                             f"collapsible--{section.css_class}"
@@ -272,10 +318,16 @@ class WordDetailScreen(WAScreen):
     def _compose_information(self) -> Collapsible | None:
         elements: list[Widget] = []
 
+        elements.append(
+            Label(
+                f"[i][b]{EN_LANG.WORD}[/][/]: {self._word.word}",
+            )
+        )
+
         if self._word.syllables.has_value:
             elements.append(
                 Label(
-                    f"[i][u]{EN_LANG.SYLLABLES}[/][/]: "
+                    f"[i][b]{EN_LANG.SYLLABLES}[/][/]: "
                     f"{self._word.syllables.as_string}",
                     classes="syllables",
                 )
@@ -286,9 +338,11 @@ class WordDetailScreen(WAScreen):
             if self._word.syllables.has_value:
                 label_css += " mt-1"
             elements.append(
-                Label(
-                    f"[i][u]{EN_LANG.ETYMOLOGIES}[/][/]: ",
+                WALabel(
+                    EN_LANG.ETYMOLOGIES,
+                    separator=": ",
                     classes=label_css,
+                    styles="ib",
                 )
             )
 
@@ -308,9 +362,11 @@ class WordDetailScreen(WAScreen):
             label_css = "collapsible--pos"
             if self._word.etymologies.has_value:
                 label_css += " mt-1"
-                flabel = Label(
-                    f"[i][u]{EN_LANG.FREQUENCY} {TOOLTIP_ICON}[/][/]: ",
+                flabel = WALabel(
+                    f"{EN_LANG.FREQUENCY} {TOOLTIP_ICON}",
                     classes=label_css,
+                    separator=": ",
+                    styles="ib",
                 )
                 flabel.tooltip = EN_LANG_FORMATS.FREQUENCY_TOOLTIP.format(
                     start=in_order[0].start,
@@ -479,19 +535,34 @@ class WordDetailScreen(WAScreen):
         yield Footer()
 
     # Event Listeners
+    def action_click_word(self, word: str) -> None:
+        if event := self._current_click_event:
+            if event.button == 1:
+                print(f"Go to word details for '{word}'.")
+            elif event.button == 2:
+                pyperclip.copy(word)
+
     def action_close_all_sections(self) -> None:
         for section in self._active_sections.values():
             section.collapsed = True
-
-    def on_key(self, event: Key) -> None:
-        # Scroll the section if it's keyboard shortcut is pressed.
-        if widget := self._active_sections.get(event.key, None):
-            self._wa_scroll_to(collapsible=widget)
 
     def on_button_pressed(self, event: Button.Pressed) -> None:
         id_ = event.control.id or ""
         key_bind = self.SidebarButtonManager.parse_button_id(id_)
         if widget := self._active_sections.get(key_bind, None):
+            self._wa_scroll_to(collapsible=widget)
+
+    def on_mouse_down(self, event: MouseDown) -> None:
+        # Hacky way to get the event from an
+        # inline-link action (ClickableSentence).
+        self._current_click_event = event
+
+    def on_mouse_up(self, _: MouseUp):
+        self._current_click_event = None
+
+    def on_key(self, event: Key) -> None:
+        # Scroll the section if it's keyboard shortcut is pressed.
+        if widget := self._active_sections.get(event.key, None):
             self._wa_scroll_to(collapsible=widget)
 
     # Misc Functions

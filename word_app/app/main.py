@@ -35,13 +35,6 @@ class WordApp(App):
             discover=True,
         )
 
-    def get_theme_variable_defaults(self) -> dict:
-        return {
-            "keyboard-action-foreground": self.ctx.theme.variables.get(
-                "keyboard-action-foreground"
-            )
-        }
-
     # Event handlers.
     def on_mount(self) -> None:
         for theme in self.ctx.themes:

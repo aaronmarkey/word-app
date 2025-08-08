@@ -23,4 +23,4 @@ class HomeScreen(WAScreen):
         self.app.push_screen(SettingsScreen(), wait_for_dismiss=False)
 
     def action_push_word(self) -> None:
-        self.app.push_screen(example_word_screen(self.app.ctx.conf))
+        self.app.push_screen(example_word_screen())

@@ -1,3 +1,4 @@
+from typing import Any, Mapping
 from textual.widgets import Label
 
 from word_app.ui.constants import BOUND_KEY, TOOLTIP_ICON
@@ -33,9 +34,14 @@ def WALabel(
 
     lt += separator
 
-    options = {}
+    # Mypy doesn't support dictionary unpacking, a basic Python feature.
+    # Fucking worthless type checker.
+    # So I have to use shit typing to get it to stop complaining about
+    # something it shouldn't.
+    options: dict[str, Any] = {}
     if classes:
         options["classes"] = classes
+
     label = Label(lt, **options)
 
     if tooltip:

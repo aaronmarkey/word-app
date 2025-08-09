@@ -39,8 +39,8 @@ class WordApp(App):
     def on_mount(self) -> None:
         for theme in self.ctx.themes:
             self.register_theme(theme)
-        for theme in BUILTIN_THEMES:
-            self.unregister_theme(theme)
+        for theme_name in BUILTIN_THEMES:
+            self.unregister_theme(theme_name)
 
         self.theme = self.ctx.theme.name
         self.push_screen("home")

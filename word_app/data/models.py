@@ -1,8 +1,11 @@
 from collections import defaultdict
+from typing import Generic, TypeVar
 
 from pydantic import BaseModel
 
 from word_app.data.grammar import Grammar, Nothing
+
+WordDetailType = TypeVar("WordDetailType", bound="WordDetail")
 
 
 class WordDetail(BaseModel):
@@ -44,11 +47,11 @@ class Syllable(BaseModel):
     text: str
 
 
-class WordDetailContainer(BaseModel):
+class WordDetailContainer(BaseModel, Generic[WordDetailType]):
     source: str = ""
 
     @property
-    def _details(self) -> list[WordDetail]:
+    def _details(self) -> list[WordDetailType]:
         return []
 
     @property
@@ -56,8 +59,8 @@ class WordDetailContainer(BaseModel):
         return bool(self._details)
 
     @property
-    def by_type(self) -> dict[Grammar, list[WordDetail]]:
-        values: dict[Grammar, list[WordDetail]] = defaultdict(list)
+    def by_type(self) -> dict[Grammar, list[WordDetailType]]:
+        values: dict[Grammar, list[WordDetailType]] = defaultdict(list)
 
         for detail in self._details:
             values[detail.type].append(detail)
@@ -65,27 +68,27 @@ class WordDetailContainer(BaseModel):
         return dict(values)
 
 
-class Definitions(WordDetailContainer):
+class Definitions(WordDetailContainer[Definition]):
     definitions: list[Definition] = []
 
     @property
-    def _details(self) -> list[WordDetail]:
+    def _details(self) -> list[Definition]:
         return self.definitions
 
 
-class Etymologies(WordDetailContainer):
+class Etymologies(WordDetailContainer[Etymology]):
     etymologies: list[Etymology] = []
 
     @property
-    def _details(self) -> list[WordDetail]:
+    def _details(self) -> list[Etymology]:
         return self.etymologies
 
 
-class Examples(WordDetailContainer):
+class Examples(WordDetailContainer[Example]):
     examples: list[Example] = []
 
     @property
-    def _details(self) -> list[WordDetail]:
+    def _details(self) -> list[Example]:
         return self.examples
 
 
@@ -101,11 +104,11 @@ class FrequencyGraph(BaseModel):
         return sorted(self.intervals, key=lambda x: x.start)
 
 
-class Phrases(WordDetailContainer):
+class Phrases(WordDetailContainer[Phrase]):
     phrases: list[Phrase] = []
 
     @property
-    def _details(self) -> list[WordDetail]:
+    def _details(self) -> list[Phrase]:
         return self.phrases
 
 
@@ -126,11 +129,11 @@ class Syllables(BaseModel):
         )
 
 
-class Thesaurus(WordDetailContainer):
+class Thesaurus(WordDetailContainer[Nym]):
     nyms: list[Nym] = []
 
     @property
-    def _details(self) -> list[WordDetail]:
+    def _details(self) -> list[Nym]:
         return self.nyms
 
 

@@ -4,7 +4,7 @@ from word_app.data.wordnik.sources import AmericanHeritage
 from word_app.data.wordnik.transformer import WordnikTransformer
 from word_app.exceptions import WordAppException
 
-from wordnik import *
+from wordnik import WordApi, swagger
 
 WORKNIK_API_URL = "http://api.wordnik.com/v4"
 
@@ -28,10 +28,13 @@ class WordnikDataService(BaseDataService):
         source_dictionary = kwargs.get("source_dictionary", AmericanHeritage)
 
         try:
-            responses = self.client.getDefinitions(
-                word,
-                sourceDictionaries=source_dictionary.api_value,
-                limit=limit,
+            responses = (
+                self.client.getDefinitions(
+                    word,
+                    sourceDictionaries=source_dictionary.api_value,
+                    limit=limit,
+                )
+                or []
             )
             definitions = Definitions(source=source_dictionary.title)
             for resp in responses:
@@ -45,9 +48,12 @@ class WordnikDataService(BaseDataService):
         limit = kwargs.get("limit", self.THESAURUS_LIMIT)
 
         try:
-            responses = self.client.getRelatedWords(
-                word,
-                limitPerRelationshipType=limit,
+            responses = (
+                self.client.getRelatedWords(
+                    word,
+                    limitPerRelationshipType=limit,
+                )
+                or []
             )
             thesaurus = Thesaurus()
             for resp in responses:

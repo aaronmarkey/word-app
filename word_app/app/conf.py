@@ -98,7 +98,11 @@ class UsrConf(BaseSettings):  # TODO: Rename to UsrConf or something.
     def from_env(cls: type[UsrConf], env_path: Path) -> UsrConf:
         """Get the application configuration."""
         full_path = env_path / ".env"
-        return cls(_env_file=full_path)
+
+        # Once again, mypy is a fucking failure of a library.
+        # https://docs.pydantic.dev/latest/concepts/pydantic_settings/#dotenv-env-support
+        # _env_file _is_ an expected keyword argument, mypy is just dogshit.
+        return cls(_env_file=full_path)  # type: ignore
 
     def conf_for_data_source(self, ds: DataSource) -> DataSourceConf:
         return getattr(self, f"ds_{ds.id.lower()}")

@@ -220,7 +220,7 @@ class WordDetailScreen(WAScreen):
         include_attribution: bool = True,
     ) -> Collapsible | None:
         if container.has_value:
-            labels = []
+            labels: list[Widget] = []
 
             if include_attribution:
                 attribution_text = EN_LANG_FORMATS.ATTRIBUTION.format(

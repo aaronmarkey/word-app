@@ -1,4 +1,4 @@
-from typing import Any, Mapping
+from typing import Any
 from textual.widgets import Label
 
 from word_app.ui.constants import BOUND_KEY, TOOLTIP_ICON

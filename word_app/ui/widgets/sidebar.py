@@ -1,6 +1,6 @@
 from textual.app import ComposeResult
 from textual.containers import VerticalScroll
-from textual.widgets import Button, Static
+from textual.widgets import Button
 
 from word_app.ui.constants import BOUND_KEY, TOOLTIP_ICON
 

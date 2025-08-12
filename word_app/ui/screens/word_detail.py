@@ -412,8 +412,8 @@ class WordDetailScreen(WAScreen):
         )
 
     def _compose_sidebar(self) -> ComposeResult:
-        active_buttons: list[Button] = []
-        inactive_buttons: list[Button] = []
+        active_buttons: list[Widget] = []
+        inactive_buttons: list[Widget] = []
 
         infb = SidebarButton(
             InformationSection.title,

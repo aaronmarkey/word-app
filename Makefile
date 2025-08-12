@@ -1,6 +1,7 @@
-# Run code linter.
+# Run code linter and static type checker
 check:
 	poetry run ruff check .
+	poetry run mypy .
 
 # Clean project of all auto-generated directories and files.
 clean:
@@ -20,10 +21,10 @@ run:
 run-dev:
 	poetry run textual run --dev word_app/__main__.py
 
+# Run unit tests
+test:
+	poetry run pytest .
+
 # Run the Textual debug console. Start _before_ running application.
 textual-console:
 	poetry run textual console
-
-# Run code static type checker.
-type-check:
-	poetry run mypy .

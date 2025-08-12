@@ -15,8 +15,9 @@ To use, run `poetry run textual run word_app/__main__.py`.
 - Install with the `dev` group (`poetry install --with dev`).
 - Develop like a normal python application.
   - I don't really care for unit testing—wasteful enterprise nonsense.
-    So, you'll not find any tests and I won't be listening to arguments for
-    wasting my limited time on them.
+    So, you'll not find a "complete" suite and I won't be listening to arguments
+    for wasting my limited time on reviewing or maintaining such a suite.
+    Tests are only written for things that need them.
   - There's no process for contributing, if you end up contributing:
     1. Fork.
     2. Branch from `main`.

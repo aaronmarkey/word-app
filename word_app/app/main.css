@@ -6,6 +6,10 @@ Sidebar {
     height: 100vh;
     background: $background-lighten-1;
 
+    &.wide {
+        width: 40%;
+    }
+
     &.with-footer {
         padding-bottom: 2;
     }

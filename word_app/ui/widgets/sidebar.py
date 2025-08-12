@@ -1,5 +1,6 @@
 from textual.app import ComposeResult
 from textual.containers import VerticalScroll
+from textual.widget import Widget
 from textual.widgets import Button
 
 from word_app.ui.constants import BOUND_KEY, TOOLTIP_ICON
@@ -22,7 +23,7 @@ def SidebarButton(
 
 
 class Sidebar(VerticalScroll):
-    def __init__(self, elements: list[Button], *args, **kwargs) -> None:
+    def __init__(self, elements: list[Widget], *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
         self._elements = elements
 

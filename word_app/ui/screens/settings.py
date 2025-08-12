@@ -28,7 +28,7 @@ class WidgetId:
 
 
 class SettingsScreen(WAScreen):
-    WA_BINDING = "s"
+    WA_BINDING = "ctrl+s"
     WA_DESCRIPTION = EN_LANG.SETTINGS_SCREEN_DESC
     WA_ICON = "⚙️"
     WA_TITLE = EN_LANG.SETTINGS_SCREEN_TITLE

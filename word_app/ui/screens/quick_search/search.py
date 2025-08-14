@@ -202,6 +202,8 @@ class SuggestionPalette(ModalScreen[ScreenResultType], inherit_css=False):
     _calling_screen: var[Screen[Any] | None] = var(None)
     """A record of the screen that was active when we were called."""
 
+    _BELOW_CLASS = "below"
+
     @dataclass
     class OptionHighlighted(Message):
         """Posted to App when an option is highlighted in the palette."""
@@ -330,7 +332,7 @@ class SuggestionPalette(ModalScreen[ScreenResultType], inherit_css=False):
         """Configure the palette once the DOM is ready."""
         self.app.post_message(SuggestionPalette.Opened())
         self._calling_screen = self.app.screen_stack[-2]
-        self._calling_screen.add_class("below")
+        self._calling_screen.add_class(self._BELOW_CLASS)
 
         match_style = self.get_visual_style(
             "suggestion-palette--highlight", partial=True
@@ -356,7 +358,7 @@ class SuggestionPalette(ModalScreen[ScreenResultType], inherit_css=False):
             )
             self._providers.clear()
         if screen := self._calling_screen:
-            screen.remove_class("below")
+            screen.remove_class(self._BELOW_CLASS)
 
     def _stop_busy_countdown(self) -> None:
         """Stop any busy countdown that's in effect."""

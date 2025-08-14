@@ -43,6 +43,10 @@ Screen.below {
     opacity: 1% !important;
     background: $footer-key-foreground !important;
     color: $foreground !important;
+
+    CollapsibleTitle {
+        color: $foreground !important;
+    }
 }
 
 /* Classes */

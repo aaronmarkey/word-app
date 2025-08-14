@@ -1,3 +1,6 @@
+import random
+from typing import ClassVar
+
 import factory
 from faker import Faker
 from faker.providers import BaseProvider, DynamicProvider, company
@@ -8,6 +11,10 @@ from word_app.data.grammar import (
     THESAURUS_GRAMMARS,
     Miscellaneous,
 )
+from word_app.data.search_providers.models import SearchSuggestionType
+from word_app.ui.screens.quick_search._providers import Provider
+from word_app.ui.screens.quick_search._models import Hit, Hits
+from word_app.ui.screens.word_detail import WordDetailScreen
 
 dictionary_grammar = DynamicProvider(
     provider_name="dictionary_grammar", elements=DICTIONARY_GRAMMARS
@@ -43,11 +50,16 @@ class CustomProvider(BaseProvider):
         return graph
 
 
-fake = Faker()
-fake.add_provider(company)
-fake.add_provider(CustomProvider)
-fake.add_provider(dictionary_grammar)
-fake.add_provider(thesaurus_grammar)
+def make_faker(*providers) -> Faker:
+    faker = Faker()
+    for provider in providers:
+        faker.add_provider(provider)
+    return faker
+
+
+fake = make_faker(
+    company, CustomProvider, dictionary_grammar, thesaurus_grammar
+)
 
 
 class DefinitionFactory(factory.Factory):
@@ -176,3 +188,28 @@ class WordFactory(factory.Factory):
     phrases = factory.SubFactory(PhrasesFactory)
     syllables = factory.SubFactory(SyllablesFactory)
     thesaurus = factory.SubFactory(ThesaurusFactory)
+
+
+class FakerProvider(Provider):
+    MIN_SUGGESTIONS: ClassVar[int] = 1
+    MAX_SUGGESTIONS: ClassVar[int] = 10
+    WORD_PROVIDER_CLS: ClassVar[type[factory.Factory]] = WordFactory
+
+    def _action(self, details):
+        async def __action():
+            self.app.push_screen(WordDetailScreen(word=details))
+
+        return __action
+
+    async def search(self, query: str) -> Hits:
+        count = random.randint(self.MIN_SUGGESTIONS, self.MAX_SUGGESTIONS + 1)
+
+        for _ in range(count):
+            details = self.WORD_PROVIDER_CLS()
+            yield Hit(
+                score=random.random(),
+                match_display=f"[u]{details.word}[/]",
+                action=self._action(details),
+                text=details.word,
+                help=random.choice([t for t in SearchSuggestionType]).display,
+            )

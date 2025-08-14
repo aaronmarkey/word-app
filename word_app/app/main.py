@@ -8,10 +8,17 @@ from textual.theme import BUILTIN_THEMES
 
 from word_app.app.conf import AppContext
 from word_app.ui.screens.home import HomeScreen
+from word_app.ui.screens.quick_search.search import SuggestionPalette
 from word_app.ui.screens.settings import SettingsScreen
+
+from word_app.dev.fake import FakerProvider
 
 
 class WordApp(App):
+    BINDINGS = [
+        ("f", "push_suggestion", "Find"),
+    ]
+
     CSS_PATH = "main.css"
     SCREENS = {"home": HomeScreen}
     TOOLTIP_DELAY = 0.2
@@ -34,6 +41,10 @@ class WordApp(App):
             lambda: self.push_screen(SettingsScreen(), wait_for_dismiss=False),
             discover=True,
         )
+
+    # Action Methods.
+    def action_push_suggestion(self) -> None:
+        self.app.push_screen(SuggestionPalette(providers=[FakerProvider]))
 
     # Event handlers.
     def on_mount(self) -> None:

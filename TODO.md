@@ -19,6 +19,19 @@
       number always same for section.
 
 
+## Quick Search Modal
+- [ ] Modal interface
+  - [x] CSS
+  - [x] Design
+  - [ ] Initialize with runtime dependencies
+- [x] Faker Provider
+
+
 ## Misc
 - [ ] Rethink session/cmd-line conf differences.
+- [ ] Replace theme variables with "interace-color" and "hover-color"
 - [ ] Defaults in UserConf class.
+- [ ] Dep injection
+  - [ ] Language
+  - [ ] Word Detail Providers
+  - [ ] Suggestion Providers

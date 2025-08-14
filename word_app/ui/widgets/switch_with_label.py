@@ -7,6 +7,23 @@ from word_app.ui.widgets.labels import WALabel
 
 
 class SwitchWithLabel(Widget):
+    DEFAULT_CSS = """
+    SwitchWithLabel {
+        height: auto;
+        layout: horizontal;
+        width: auto;
+        margin-bottom: 1;
+        margin-top: 1;
+        padding-right: 2;
+        padding-left: 2;
+
+        Label {
+            padding-right: 1;
+            padding-top: 1;
+        }
+    }
+    """
+
     def __init__(
         self,
         *,

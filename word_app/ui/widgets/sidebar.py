@@ -23,6 +23,30 @@ def SidebarButton(
 
 
 class Sidebar(VerticalScroll):
+    DEFAULT_CSS = """
+    Sidebar {
+        dock: left;
+        width: 25%;
+        height: 100vh;
+        background: $background-lighten-1;
+
+        &.wide {
+            width: 40%;
+        }
+
+        &.with-footer {
+            padding-bottom: 2;
+        }
+
+        &.with-header {
+            offset: 0 1;
+        }
+        & > Button {
+            width: 100%;
+        }
+    }
+    """
+
     def __init__(self, elements: list[Widget], *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
         self._elements = elements

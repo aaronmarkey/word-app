@@ -1,53 +1,4 @@
 /* Container  and Widgets */
-
-Sidebar {
-    dock: left;
-    width: 25%;
-    height: 100vh;
-    background: $background-lighten-1;
-
-    &.wide {
-        width: 40%;
-    }
-
-    &.with-footer {
-        padding-bottom: 2;
-    }
-
-    &.with-header {
-        offset: 0 1;
-    }
-    & > Button {
-        width: 100%;
-    }
-}
-
-SwitchWithLabel {
-    height: auto;
-    layout: horizontal;
-    width: auto;
-    margin-bottom: 1;
-    margin-top: 1;
-    padding-right: 2;
-    padding-left: 2;
-}
-
-SwitchWithLabel Label {
-    padding-right: 1;
-    padding-top: 1; /* idk why CSS is so fucking bad at centering things. */
-}
-
-/* Classes */
-.container-bordered {
-    border: solid $secondary;
-    border-title-align: left;
-    border-title-color: $secondary;
-    border-title-style: bold;
-}
-.mt-1 {
-    margin-top: 1;
-}
-
 Collapsible.word-detail--container {
     border: solid $primary;
     padding-bottom: 0;
@@ -86,4 +37,22 @@ Collapsible.word-detail--container {
         margin-bottom: 1;
         margin-top: 1;
     }
+}
+
+Screen.below {
+    opacity: 1% !important;
+    background: $footer-key-foreground !important;
+    color: $foreground !important;
+}
+
+/* Classes */
+.container-bordered {
+    border: solid $secondary;
+    border-title-align: left;
+    border-title-color: $secondary;
+    border-title-style: bold;
+}
+
+.mt-1 {
+    margin-top: 1;
 }

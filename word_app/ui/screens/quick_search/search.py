@@ -647,7 +647,7 @@ class SuggestionPalette(ModalScreen[ScreenResultType], inherit_css=False):
                 if isinstance(hit.prompt, Text):
                     yield Content.from_rich_text(hit.prompt)
                 else:
-                    yield Content.from_markup(hit.prompt)
+                    yield Content.from_markup(hit.prompt)  # type: ignore
 
                 # Optional help text
                 if hit.help:

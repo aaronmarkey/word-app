@@ -51,7 +51,7 @@ class WordApp(App):
     # Action Methods.
     def action_push_suggestion(self) -> None:
         self.app.push_screen(
-            SuggestionPalette(providers=self.ctx.deps.search_providers)
+            SuggestionPalette(providers=[self.ctx.deps.search_provider_cls])
         )
 
     # Event handlers.

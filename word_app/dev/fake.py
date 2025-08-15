@@ -1,3 +1,4 @@
+# type: ignore
 import random
 from typing import ClassVar
 

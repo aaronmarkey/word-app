@@ -91,7 +91,7 @@ class ApplicationSettings(BaseSettings):
 
 @dataclass
 class ApplicationDependencies:
-    search_providers: list[type[Provider]]
+    search_provider_cls: type[Provider]
     theme_dark: Theme
     theme_light: Theme
     word_provider: AbstractWordProvider

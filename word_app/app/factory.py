@@ -6,36 +6,36 @@ from word_app.app.conf import (
     ApplicationSettings,
 )
 from word_app.app.main import WordApp
-from word_app.data.sources import DataSource, get_available_data_sources
-from word_app.dev.fake import FakerProvider, FakeWordProvider
+from word_app.data.sources import DataSource
+from word_app.data.word_providers.base import AbstractWordProvider
 from word_app.io import ApplicationPath
-from word_app.ui.theme import DarkTheme, LightTheme
+from word_app.ui.screens.quick_search._providers import Provider
 
 
 def create_app(
     *,
-    dark_theme: Theme | None = None,
-    data_sources: list[DataSource] | None = None,
-    light_theme: Theme | None = None,
-    path: ApplicationPath | None = None,
+    dark_theme: Theme,
+    data_sources: list[DataSource],
+    light_theme: Theme,
+    path: ApplicationPath,
+    search_provider_cls: type[Provider],
+    word_provider: AbstractWordProvider,
 ) -> WordApp:
-    path = path or ApplicationPath()
-
     settings = ApplicationSettings.from_sources(
         lambda: ApplicationSettings(_env_file=(path.usr / ".env")),  # type: ignore
         ApplicationSettings,
     )
 
     deps = ApplicationDependencies(
-        search_providers=[FakerProvider],
-        theme_dark=dark_theme or DarkTheme,
-        theme_light=light_theme or LightTheme,
-        word_provider=FakeWordProvider(),
+        search_provider_cls=search_provider_cls,
+        theme_dark=dark_theme,
+        theme_light=light_theme,
+        word_provider=word_provider,
     )
 
     ctx = AppContext(
         settings=settings,
-        data_sources=data_sources or get_available_data_sources(),
+        data_sources=data_sources,
         deps=deps,
         path=path,
     )

@@ -13,6 +13,16 @@ clean:
 format:
 	poetry run ruff format .
 
+# Install project
+install:
+	poetry install
+	cp -n ./word_app/usr/.env.example ./word_app/usr/.env || true
+
+# Install project with dev dependencies
+install-dev:
+	poetry install --with dev
+	cp -n ./word_app/usr/.env.example ./word_app/usr/.env || true
+
 # Run
 run:
 	poetry run textual run word_app/__main__.py

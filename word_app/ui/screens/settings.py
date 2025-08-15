@@ -44,7 +44,9 @@ class SettingsScreen(WAScreen):
 
         widgets: list[SwitchWithLabel] = []
         for ds in self.app.ctx.data_sources:
-            if ds_conf := getattr(self.app.ctx.conf_usr.ds, ds.id, None):
+            if ds_conf := getattr(
+                self.app.ctx.settings.data_sources, ds.id, None
+            ):
                 widget = (
                     SwitchWithLabel(
                         label_text=ds.label_name,
@@ -92,10 +94,10 @@ class SettingsScreen(WAScreen):
         event.stop()
         _id = event.input.id or ""
         ds, prop = WidgetId.parse(_id)
-        self.app.ctx.conf_usr.update_ds_by_name(ds, prop, event.input.value)
+        self.app.ctx.settings.update_ds_by_name(ds, prop, event.input.value)
 
     def on_switch_changed(self, event: Switch.Changed) -> None:
         event.stop()
         _id = event.switch.id or ""
         ds, prop = WidgetId.parse(_id)
-        self.app.ctx.conf_usr.update_ds_by_name(ds, prop, event.switch.value)
+        self.app.ctx.settings.update_ds_by_name(ds, prop, event.switch.value)

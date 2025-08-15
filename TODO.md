@@ -28,9 +28,9 @@
 
 
 ## Misc
-- [ ] Rethink session/cmd-line conf differences.
-- [ ] Replace theme variables with "interace-color" and "hover-color"
-- [ ] Defaults in UserConf class.
+- [x] Rethink session/cmd-line conf differences.
+- [x] Replace theme variables with "interace-color" and "hover-color"
+- [x] Defaults in UserConf class.
 - [ ] Dep injection
   - [ ] Language
   - [ ] Word Detail Providers

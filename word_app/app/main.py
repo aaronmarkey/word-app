@@ -42,6 +42,14 @@ class WordApp(App):
             discover=True,
         )
 
+    def get_theme_variable_defaults(self) -> dict[str, str]:
+        # Change variables in word_app.ui.theme when doing updates.
+        return {
+            "footer-key-foreground": "#3376CD",
+            "user-action": "#3376CD",
+            "user-hover": "#FFA62B",
+        }
+
     # Action Methods.
     def action_push_suggestion(self) -> None:
         self.app.push_screen(SuggestionPalette(providers=[FakerProvider]))

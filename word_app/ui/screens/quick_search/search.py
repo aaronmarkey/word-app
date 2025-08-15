@@ -110,7 +110,7 @@ class SuggestionPalette(ModalScreen[ScreenResultType], inherit_css=False):
     SuggestionPalette #--input {
         height: auto;
         visibility: visible;
-        border: outer $footer-key-foreground;
+        border: outer $user-action;
     }
 
     SuggestionPalette #--input.--list-visible {

@@ -1,2 +1,2 @@
-BOUND_KEY = "[$keyboard-action-foreground][{key}][/]"
-TOOLTIP_ICON = "[$accent](?)[/]"
+BOUND_KEY = "[$user-action][{key}][/]"
+TOOLTIP_ICON = "[$user-hover](?)[/]"

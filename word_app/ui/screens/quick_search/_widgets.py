@@ -112,7 +112,7 @@ class SuggestionList(OptionList, can_focus=False):
 
     SuggestionList > .option-list--option-highlighted {
         color: $block-cursor-blurred-foreground;
-        background: $footer-key-foreground;
+        background: $user-action;
     }
 
     SuggestionList:nocolor > .option-list--option-highlighted {

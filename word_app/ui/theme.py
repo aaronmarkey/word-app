@@ -1,17 +1,19 @@
+# Change variables in /word-app/word_app/app/main.css when doing updates.
 from textual.theme import Theme
 
 DarkTheme = Theme(
     name="Dark Theme",
     primary="#D8D8D8",
     secondary="#E0E0E0",
-    accent="#ffa62b",
-    warning="#ffa62b",
-    error="#ba3c5b",
+    accent="#FFA62B",
+    warning="#FFA62B",
+    error="#BA3C5B",
     success="#4EBF71",
-    foreground="#e0e0e0",
+    foreground="#E0E0E0",
     variables={
         "footer-key-foreground": "#3376CD",
-        "keyboard-action-foreground": "#3376CD",
+        "user-action": "#3376CD",
+        "user-hover": "#FFA62B",
     },
 )
 
@@ -30,6 +32,7 @@ LightTheme = Theme(
     dark=False,
     variables={
         "footer-key-foreground": "#3376CD",
-        "keyboard-action-foreground": "#3376CD",
+        "user-action": "#3376CD",
+        "user-hover": "#FFA62B",
     },
 )

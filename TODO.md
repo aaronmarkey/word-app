@@ -23,7 +23,8 @@
 - [ ] Modal interface
   - [x] CSS
   - [x] Design
-  - [ ] Initialize with runtime dependencies
+  - [x] Initialize with runtime dependencies
+  - [ ] Real search providers
 - [x] Faker Provider
 
 
@@ -33,5 +34,5 @@
 - [x] Defaults in UserConf class.
 - [ ] Dep injection
   - [ ] Language
-  - [ ] Word Detail Providers
-  - [ ] Suggestion Providers
+  - [x] Word Detail Providers
+  - [x] Suggestion Providers

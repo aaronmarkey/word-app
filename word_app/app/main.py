@@ -11,8 +11,6 @@ from word_app.ui.screens.home import HomeScreen
 from word_app.ui.screens.quick_search.search import SuggestionPalette
 from word_app.ui.screens.settings import SettingsScreen
 
-from word_app.dev.fake import FakerProvider
-
 
 class WordApp(App):
     BINDINGS = [
@@ -52,14 +50,18 @@ class WordApp(App):
 
     # Action Methods.
     def action_push_suggestion(self) -> None:
-        self.app.push_screen(SuggestionPalette(providers=[FakerProvider]))
+        self.app.push_screen(
+            SuggestionPalette(providers=self.ctx.deps.search_providers)
+        )
 
     # Event handlers.
     def on_mount(self) -> None:
-        for theme in self.ctx.themes:
+        for theme in self.ctx.deps.themes:
             self.register_theme(theme)
         for theme_name in BUILTIN_THEMES:
             self.unregister_theme(theme_name)
 
-        self.theme = self.ctx.theme.name
+        self.theme = self.ctx.deps.theme_for_mode(
+            self.ctx.settings.theme_mode
+        ).name
         self.push_screen("home")

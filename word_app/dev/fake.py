@@ -12,6 +12,7 @@ from word_app.data.grammar import (
     Miscellaneous,
 )
 from word_app.data.search_providers.models import SearchSuggestionType
+from word_app.data.word_providers.base import AbstractWordProvider
 from word_app.ui.screens.quick_search._providers import Provider
 from word_app.ui.screens.quick_search._models import Hit, Hits
 from word_app.ui.screens.word_detail import WordDetailScreen
@@ -193,10 +194,11 @@ class WordFactory(factory.Factory):
 class FakerProvider(Provider):
     MIN_SUGGESTIONS: ClassVar[int] = 1
     MAX_SUGGESTIONS: ClassVar[int] = 10
-    WORD_PROVIDER_CLS: ClassVar[type[factory.Factory]] = WordFactory
+    FAKER: Faker = fake
 
-    def _action(self, details):
+    def _action(self, word: str):
         async def __action():
+            details = self.app.ctx.deps.word_provider.get_word_details(word)
             self.app.push_screen(WordDetailScreen(word=details))
 
         return __action
@@ -205,11 +207,22 @@ class FakerProvider(Provider):
         count = random.randint(self.MIN_SUGGESTIONS, self.MAX_SUGGESTIONS + 1)
 
         for _ in range(count):
-            details = self.WORD_PROVIDER_CLS()
+            word = self.FAKER.word()
             yield Hit(
                 score=random.random(),
-                match_display=f"[u]{details.word}[/]",
-                action=self._action(details),
-                text=details.word,
+                match_display=f"[u]{word}[/]",
+                action=self._action(word),
+                text=word,
                 help=random.choice([t for t in SearchSuggestionType]).display,
             )
+
+
+class FakeWordProvider(AbstractWordProvider):
+    FAKER: Faker = fake
+
+    def __init__(self):
+        self._word_factory_cls = WordFactory
+
+    def get_word_details(self, word: str) -> models.Word:
+        word = word.strip() or self.FAKER.word()
+        return self._word_factory_cls(word=word)

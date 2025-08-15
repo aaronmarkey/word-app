@@ -12,7 +12,9 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 from textual.theme import Theme
 
 import word_app.lib.darkdetect as darkdetect
+from word_app.data.word_providers.base import AbstractWordProvider
 from word_app.io import ApplicationPath
+from word_app.ui.screens.quick_search._providers import Provider
 
 if TYPE_CHECKING:
     from word_app.data.sources import DataSource as DataSourceInformation
@@ -88,12 +90,11 @@ class ApplicationSettings(BaseSettings):
 
 
 @dataclass
-class AppContext:
-    settings: ApplicationSettings
-    data_sources: list[DataSourceInformation]
-    path: ApplicationPath
+class ApplicationDependencies:
+    search_providers: list[type[Provider]]
     theme_dark: Theme
     theme_light: Theme
+    word_provider: AbstractWordProvider
 
     @property
     def _theme_map(self) -> dict[ThemeMode, Theme]:
@@ -106,13 +107,16 @@ class AppContext:
         }
 
     @property
-    def theme(self) -> Theme:
-        return self._theme_map[self.theme_mode]
-
-    @property
     def themes(self) -> tuple[Theme, ...]:
         return self.theme_dark, self.theme_light
 
-    @property
-    def theme_mode(self) -> ThemeMode:
-        return self.settings.theme_mode
+    def theme_for_mode(self, mode: ThemeMode) -> Theme:
+        return self._theme_map[mode]
+
+
+@dataclass
+class AppContext:
+    settings: ApplicationSettings
+    data_sources: list[DataSourceInformation]
+    deps: ApplicationDependencies
+    path: ApplicationPath

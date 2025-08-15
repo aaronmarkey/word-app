@@ -1,9 +1,13 @@
 from textual.theme import Theme
 
-from word_app.app.conf import AppContext
-from word_app.app.conf import ApplicationSettings
+from word_app.app.conf import (
+    AppContext,
+    ApplicationDependencies,
+    ApplicationSettings,
+)
 from word_app.app.main import WordApp
 from word_app.data.sources import DataSource, get_available_data_sources
+from word_app.dev.fake import FakerProvider, FakeWordProvider
 from word_app.io import ApplicationPath
 from word_app.ui.theme import DarkTheme, LightTheme
 
@@ -22,12 +26,18 @@ def create_app(
         ApplicationSettings,
     )
 
+    deps = ApplicationDependencies(
+        search_providers=[FakerProvider],
+        theme_dark=dark_theme or DarkTheme,
+        theme_light=light_theme or LightTheme,
+        word_provider=FakeWordProvider(),
+    )
+
     ctx = AppContext(
         settings=settings,
         data_sources=data_sources or get_available_data_sources(),
+        deps=deps,
         path=path,
-        theme_dark=dark_theme or DarkTheme,
-        theme_light=light_theme or LightTheme,
     )
 
     return WordApp(ctx=ctx)

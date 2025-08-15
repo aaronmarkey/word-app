@@ -1,7 +1,6 @@
 from textual.app import ComposeResult
 from textual.widgets import Footer
 
-from word_app.dev.assemble_screen import example_word_screen
 from word_app.ext import WAScreen
 from word_app.ui.screens.settings import SettingsScreen
 from word_app.ui.screens.word_detail import WordDetailScreen
@@ -23,4 +22,5 @@ class HomeScreen(WAScreen):
         self.app.push_screen(SettingsScreen(), wait_for_dismiss=False)
 
     def action_push_word(self) -> None:
-        self.app.push_screen(example_word_screen())
+        word = self.app.ctx.deps.word_provider.get_word_details("")
+        self.app.push_screen(WordDetailScreen(word=word))

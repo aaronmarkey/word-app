@@ -33,7 +33,7 @@ from word_app.data.grammar import (
 from word_app.data.models import Word, WordDetailContainer
 from word_app.ext import WAScreen
 from word_app.lex import EN_LANG, EN_LANG_FORMATS
-from word_app.ui.constants import TOOLTIP_ICON
+from word_app.ui.constants import HELP_HOVER_ICON
 from word_app.ui.navigation.common import POP_SCREEN
 from word_app.ui.widgets import Sidebar, SidebarButton, WALabel
 
@@ -363,7 +363,7 @@ class WordDetailScreen(WAScreen):
             if self._word.etymologies.has_value:
                 label_css += " mt-1"
                 flabel = WALabel(
-                    f"{EN_LANG.FREQUENCY} {TOOLTIP_ICON}",
+                    f"{EN_LANG.FREQUENCY} {HELP_HOVER_ICON}",
                     classes=label_css,
                     separator=": ",
                     styles="ib",

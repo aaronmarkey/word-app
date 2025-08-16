@@ -10,6 +10,7 @@ class FormattableLexicon:
 @dataclass
 class Lexicon:
     BACK: str
+    CLOSE: str
     ETYMOLOGIES: str
     FREQUENCY: str
     SYLLABLES: str
@@ -21,6 +22,9 @@ class Lexicon:
     DS_WORDNIK_NAME: str
 
     INPUT_API_KEY_PLACEHOLDER: str
+
+    QUICK_SEARCH_HELP: str
+    QUICK_SEATCH_TOOLTIP: str
 
     SETTINGS_SCREEN_DESC: str
     SETTINGS_SCREEN_SECTION_DS_TITLE: str
@@ -44,6 +48,7 @@ class Lexicon:
 
 EN_LANG = Lexicon(
     BACK="Back",
+    CLOSE="Close",
     ETYMOLOGIES="Etymologies",
     FREQUENCY="Frequency",
     SYLLABLES="Syllables",
@@ -58,6 +63,20 @@ EN_LANG = Lexicon(
     ),
     DS_WORDNIK_NAME="Wordnik",
     INPUT_API_KEY_PLACEHOLDER="Enter API Key",
+    QUICK_SEARCH_HELP="""
+> ### Autocomplete
+> Enter terms to quickly find words via autocomplete. Miss-spellings are okay.
+
+> ### Phrases
+> Words for phrases can be found to, for example: `ringing in the ears`
+would return `tinnitus`.
+
+> ### Spelling
+> Use `*` and `?` to find words by spelling.
+> - Example: `t**o` returns word beginning with `t`, ending in `o`, and two middle letters.
+> - Example `t?` returns all words beginning with `t`, regardless of length, `?t`, all words ending with `t`, `t?t`, beginning and ending with `t`, regardless of length.
+    """,
+    QUICK_SEATCH_TOOLTIP="[u]Click[/] or press [$user-action][ctrl+h][/] for help.",
     SETTINGS_SCREEN_DESC="Configure the application.",
     SETTINGS_SCREEN_SECTION_DS_TITLE="Data Sources",
     SETTINGS_SCREEN_TITLE="Settings",

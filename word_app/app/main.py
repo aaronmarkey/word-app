@@ -1,18 +1,15 @@
 from __future__ import annotations
 
-from typing import Iterable
-
-from textual.app import App, SystemCommand
-from textual.screen import Screen
+from textual.app import App
 from textual.theme import BUILTIN_THEMES
 
 from word_app.app.conf import AppContext
 from word_app.ui.screens.home import HomeScreen
 from word_app.ui.screens.quick_search.search import SuggestionPalette
-from word_app.ui.screens.settings import SettingsScreen
 
 
 class WordApp(App):
+    ENABLE_COMMAND_PALETTE = False
     BINDINGS = [
         ("f", "push_suggestion", "Find"),
     ]
@@ -31,21 +28,11 @@ class WordApp(App):
         super().__init__(*args, **kwargs)
 
     # Base Class Methods.
-    def get_system_commands(self, screen: Screen) -> Iterable[SystemCommand]:
-        yield from super().get_system_commands(screen)
-        yield SystemCommand(
-            SettingsScreen.WA_TITLE,
-            SettingsScreen.WA_DESCRIPTION,
-            lambda: self.push_screen(SettingsScreen(), wait_for_dismiss=False),
-            discover=True,
-        )
-
     def get_theme_variable_defaults(self) -> dict[str, str]:
         # Change variables in word_app.ui.theme when doing updates.
         return {
             "footer-key-foreground": "#3376CD",
             "user-action": "#3376CD",
-            "user-hover": "#FFA62B",
         }
 
     # Action Methods.

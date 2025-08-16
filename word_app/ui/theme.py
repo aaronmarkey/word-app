@@ -13,7 +13,6 @@ DarkTheme = Theme(
     variables={
         "footer-key-foreground": "#3376CD",
         "user-action": "#3376CD",
-        "user-hover": "#FFA62B",
     },
 )
 
@@ -33,6 +32,5 @@ LightTheme = Theme(
     variables={
         "footer-key-foreground": "#3376CD",
         "user-action": "#3376CD",
-        "user-hover": "#FFA62B",
     },
 )

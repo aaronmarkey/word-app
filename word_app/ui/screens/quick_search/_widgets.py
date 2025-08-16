@@ -2,7 +2,6 @@ from __future__ import annotations
 
 from functools import total_ordering
 
-import rich.repr
 from textual.reactive import var
 from textual.widgets import Input, OptionList, Static
 from textual.widgets.option_list import Option
@@ -11,7 +10,6 @@ from textual.visual import VisualType
 from word_app.ui.screens.quick_search._models import Hit
 
 
-@rich.repr.auto
 @total_ordering
 class Suggestion(Option):
     """Class that holds a hit in the SuggestionList."""

@@ -3,7 +3,7 @@ from textual.containers import VerticalScroll
 from textual.widget import Widget
 from textual.widgets import Button
 
-from word_app.ui.constants import BOUND_KEY, TOOLTIP_ICON
+from word_app.ui.constants import BOUND_KEY, HELP_HOVER_ICON
 
 
 def SidebarButton(
@@ -12,7 +12,7 @@ def SidebarButton(
     if key_binding:
         text = f"{BOUND_KEY.format(key=key_binding)} {text}"
     if desc:
-        text += f" {TOOLTIP_ICON}"
+        text += f" {HELP_HOVER_ICON}"
 
     button = Button(text, variant="default", compact=False, **kwargs)
 

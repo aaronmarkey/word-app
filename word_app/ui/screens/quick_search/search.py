@@ -28,19 +28,23 @@ from textual import on, work
 from textual.binding import Binding, BindingType
 from textual.containers import Horizontal, Vertical
 from textual.content import Content
-from textual.events import Click, Mount
+from textual.events import Click, Key, Mount
 from textual.message import Message
 from textual.reactive import var
 from textual.screen import ModalScreen, Screen, ScreenResultType
 from textual.style import Style
 from textual.timer import Timer
-from textual.widgets import Button, Input, LoadingIndicator, OptionList
+from textual.widgets import Button, Input, Label, LoadingIndicator, OptionList
 from textual.widgets.option_list import Option
 from textual.worker import get_current_worker
+
+from word_app.ui.screens.help import HelpScreen
 
 if TYPE_CHECKING:
     from textual.app import App, ComposeResult
 
+from word_app.lex import EN_LANG
+from word_app.ui.constants import HELP_HCLICK_ICON
 from word_app.ui.screens.quick_search._models import Hit, Hits
 from word_app.ui.screens.quick_search._providers import Provider, ProviderSource
 from word_app.ui.screens.quick_search._widgets import (
@@ -59,6 +63,7 @@ class SuggestionPalette(ModalScreen[ScreenResultType], inherit_css=False):
     COMPONENT_CLASSES: ClassVar[set[str]] = {
         "suggestion-palette--help-text",
         "suggestion-palette--highlight",
+        "screen--selection",
     }
 
     DEFAULT_CSS = """
@@ -171,27 +176,6 @@ class SuggestionPalette(ModalScreen[ScreenResultType], inherit_css=False):
             show=False,
         ),
     ]
-    """
-    | Key(s) | Description |
-    | :- | :- |
-    | ctrl+end, shift+end | Jump to the last available suggestions. |
-    | ctrl+home, shift+home | Jump to the first available suggestions. |
-    | down | Navigate down through the available suggestions. |
-    | escape | Exit the palette. |
-    | pagedown | Navigate down a page through the available suggestions. |
-    | pageup | Navigate up a page through the available suggestions. |
-    | up | Navigate up through the available suggestions. |
-    """
-
-    run_on_select: ClassVar[bool] = True
-    """A flag to say if a suggestion should be run when selected by the user.
-
-    If `True` then when a user hits `Enter` on a suggestion match in the result
-    list, or if they click on one with the mouse, the suggestionwill be
-    selected and run. If set to `False` the input will be filled with the
-    suggestion and then `Enter` should be pressed on the keyboard or the 'go'
-    button should be pressed.
-    """
 
     _list_visible: var[bool] = var(False, init=False)
     """Internal reactive to toggle the visibility of the suggestion list."""
@@ -300,14 +284,15 @@ class SuggestionPalette(ModalScreen[ScreenResultType], inherit_css=False):
         Returns:
             The content of the screen.
         """
+        help_label = Label(HELP_HCLICK_ICON, id="help-icon")
+        help_label.tooltip = EN_LANG.QUICK_SEATCH_TOOLTIP
         with Vertical(id="--container"):
             with Horizontal(id="--input"):
                 yield SuggestionIcon()
+                yield help_label
                 yield SuggestionInput(
                     placeholder=self._placeholder, select_on_focus=False
                 )
-                if not self.run_on_select:
-                    yield Button("\u25b6")
             with Vertical(id="--results"):
                 yield SuggestionList()
                 yield LoadingIndicator()
@@ -321,6 +306,10 @@ class SuggestionPalette(ModalScreen[ScreenResultType], inherit_css=False):
         This method is used to allow clicking on the 'background' as a
         method of dismissing the palette.
         """
+        if w := event.widget:
+            if w.id == "help-icon":
+                self._action_show_help()
+
         if self.get_widget_at(event.screen_x, event.screen_y)[0] is self:
             self._cancel_gather_suggestions()
             self.app.post_message(
@@ -741,8 +730,7 @@ class SuggestionPalette(ModalScreen[ScreenResultType], inherit_css=False):
         self._list_visible = False
         self.query_one(SuggestionList).clear_options()
         self._hit_count = 0
-        if self.run_on_select:
-            self._select_or_suggest()
+        self._select_or_suggest()
 
     @on(Input.Submitted)
     @on(Button.Pressed)
@@ -790,11 +778,24 @@ class SuggestionPalette(ModalScreen[ScreenResultType], inherit_css=False):
             SuggestionPalette.OptionHighlighted(highlighted_event=event)
         )
 
+    @on(Key)
+    def _on_key_press(self, event: Key) -> None:
+        """Handle key events."""
+        if event.character == "\x08":
+            self._action_show_help()
+
     def _action_escape(self) -> None:
         """Handle a request to escape out of the palette."""
         self._cancel_gather_suggestions()
         self.app.post_message(SuggestionPalette.Closed(option_selected=False))
         self.dismiss()
+
+    def _action_show_help(self):
+        self.app.push_screen(
+            HelpScreen(
+                EN_LANG.QUICK_SEARCH_HELP, title="Help", button=EN_LANG.CLOSE
+            )
+        )
 
     def _action_suggestion_list(self, action: str) -> None:
         """Pass an action on to the SuggestionList.

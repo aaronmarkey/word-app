@@ -1,7 +1,7 @@
 from typing import Any
 from textual.widgets import Label
 
-from word_app.ui.constants import BOUND_KEY, TOOLTIP_ICON
+from word_app.ui.constants import BOUND_KEY, HELP_HOVER_ICON
 
 
 def WALabel(
@@ -24,7 +24,7 @@ def WALabel(
     lt = f"{' ' * lpadding}{text}{' ' * rpadding}"
 
     if tooltip:
-        lt += f" {TOOLTIP_ICON}"
+        lt += f" {HELP_HOVER_ICON}"
 
     if binding_key:
         lt = BOUND_KEY.format(key=binding_key) + f" {lt}"

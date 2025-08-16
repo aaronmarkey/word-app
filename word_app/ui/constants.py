@@ -1,2 +1,4 @@
 BOUND_KEY = "[$user-action][{key}][/]"
-TOOLTIP_ICON = "[$user-hover](?)[/]"
+
+HELP_HOVER_ICON = "[b][$user-action]<?>[/][/]"
+HELP_HCLICK_ICON = "[u][b][$user-action]<?>[/][/][/]"

@@ -70,6 +70,17 @@ class SwitchWithLabel(Widget):
 
 
 class SwitchWithInput(SwitchWithLabel):
+    DEFAULT_CSS = """
+    SwitchWithInput {
+        Input {
+            &:focus {
+                border: tall $user-action;
+            }
+            width: 1fr;
+        }
+    }
+    """
+
     def __init__(
         self,
         *,

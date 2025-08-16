@@ -34,7 +34,6 @@ from word_app.data.models import Word, WordDetailContainer
 from word_app.ext import WAScreen
 from word_app.lex import EN_LANG, EN_LANG_FORMATS
 from word_app.ui.constants import HELP_HOVER_ICON
-from word_app.ui.navigation.common import POP_SCREEN
 from word_app.ui.widgets import Sidebar, SidebarButton, WALabel
 
 
@@ -122,7 +121,7 @@ PhraseSection = WordDetailSection(
 class WordDetailScreen(WAScreen):
     AUTO_FOCUS = ""
     BINDINGS = [
-        POP_SCREEN.binding,
+        ("escape", "app.pop_screen", EN_LANG.BACK),
         ("-", "close_all_sections", EN_LANG.WD_CLOSE_ALL_SECTIONS),
     ]
 

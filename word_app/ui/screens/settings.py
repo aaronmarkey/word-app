@@ -7,8 +7,6 @@ from textual.widgets import Footer, Header, Input, Switch
 from word_app.data.sources import DataSource
 from word_app.ext import WAScreen
 from word_app.lex import EN_LANG
-from word_app.ui.containers import ContainerWithBorderLabel
-from word_app.ui.navigation.common import POP_SCREEN
 from word_app.ui.widgets import SwitchWithInput, SwitchWithLabel
 
 
@@ -34,7 +32,7 @@ class SettingsScreen(WAScreen):
     WA_TITLE = EN_LANG.SETTINGS_SCREEN_TITLE
 
     AUTO_FOCUS = ""
-    BINDINGS = [POP_SCREEN.binding]
+    BINDINGS = [("escape", "app.pop_screen", EN_LANG.BACK)]
     TITLE = WA_ICON + " " + WA_TITLE
 
     def _compose_data_sources_section(self) -> list[SwitchWithLabel]:
@@ -81,11 +79,11 @@ class SettingsScreen(WAScreen):
         h.disabled = True
         yield h
 
-        yield ContainerWithBorderLabel(
-            EN_LANG.SETTINGS_SCREEN_SECTION_DS_TITLE,
-            VerticalGroup,
-            *self._compose_data_sources_section(),
+        container = VerticalGroup(
+            *self._compose_data_sources_section(), classes="container-bordered"
         )
+        container.border_title = EN_LANG.SETTINGS_SCREEN_SECTION_DS_TITLE
+        yield container
 
         yield Footer()
 

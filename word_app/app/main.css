@@ -39,13 +39,27 @@ Collapsible.word-detail--container {
     }
 }
 
-Screen.below {
-    opacity: 1% !important;
+WAScreen.below {
+    opacity: 10% !important;
     background: $user-action !important;
     color: $foreground !important;
 
     CollapsibleTitle {
         color: $foreground !important;
+    }
+}
+
+Switch {
+    &.-on .switch--slider {
+        color: $user-action;
+    }
+    & .switch--slider {
+        color: $user-action 20%;
+    }
+    &:light {
+        &.-on .switch--slider {
+            color: $user-action;
+        }
     }
 }
 

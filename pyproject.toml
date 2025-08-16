@@ -27,6 +27,7 @@ factory-boy = "^3.3.3"
 mypy = "^1.17.1"
 pytest = "^8.4.1"
 textual-cookbook = "^0.4"
+types-cachetools = "^6.1.0.20250717"
 
 [tool.mypy]
 exclude = [
@@ -39,7 +40,7 @@ python_version = "3.11"
 packages = ["word_app"]
 
 [[tool.mypy.overrides]]
-module = ["wordnik", "wordnik.*", "pyperclip"]
+module = ["wordnik", "wordnik.*", "pyperclip", "art"]
 ignore_missing_imports = true
 
 [tool.pytest.ini_options]

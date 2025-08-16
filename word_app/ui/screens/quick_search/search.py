@@ -28,12 +28,20 @@ from textual.binding import Binding, BindingType
 from textual.containers import Horizontal, Vertical
 from textual.content import Content
 from textual.events import Click, Key, Mount
+from textual.keys import Keys
 from textual.message import Message
 from textual.reactive import var
 from textual.screen import ModalScreen, Screen, ScreenResultType
 from textual.style import Style
 from textual.timer import Timer
-from textual.widgets import Button, Input, Label, LoadingIndicator, OptionList
+from textual.widgets import (
+    Button,
+    Footer,
+    Input,
+    Label,
+    LoadingIndicator,
+    OptionList,
+)
 from textual.widgets.option_list import Option
 from textual.worker import get_current_worker
 
@@ -160,7 +168,8 @@ class SuggestionPalette(ModalScreen[ScreenResultType], inherit_css=False):
             show=False,
         ),
         Binding("down", "cursor_down", "Next suggestion", show=False),
-        Binding("escape", "escape", "Exit the suggestion palette"),
+        Binding("escape", "escape", "Back"),
+        Binding("ctrl+h", "show_help", "Help"),
         Binding(
             "pagedown", "suggestion_list('page_down')", "Next page", show=False
         ),
@@ -514,6 +523,7 @@ class SuggestionPalette(ModalScreen[ScreenResultType], inherit_css=False):
             with Vertical(id="--results"):
                 yield SuggestionList()
                 yield LoadingIndicator()
+        yield Footer()
 
     # Event handlers
     @on(Input.Changed)
@@ -539,7 +549,7 @@ class SuggestionPalette(ModalScreen[ScreenResultType], inherit_css=False):
 
     async def _on_key(self, event: Key) -> None:
         """Handle key events."""
-        if event.character == "\x08":
+        if event.character == "\x08" or event.key == Keys.ControlH.value:
             self._action_show_help()
 
     def _on_mount(self, event: Mount) -> None:

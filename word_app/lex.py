@@ -76,7 +76,7 @@ would return `tinnitus`.
 > - Example: `t**o` returns word beginning with `t`, ending in `o`, and two middle letters.
 > - Example `t?` returns all words beginning with `t`, regardless of length, `?t`, all words ending with `t`, `t?t`, beginning and ending with `t`, regardless of length.
     """,
-    QUICK_SEATCH_TOOLTIP="[u]Click[/] or press [$user-action][ctrl+h][/] for help.",
+    QUICK_SEATCH_TOOLTIP="[u]Click[/] or press [$user-action][^h][/] for help.",
     SETTINGS_SCREEN_DESC="Configure the application.",
     SETTINGS_SCREEN_SECTION_DS_TITLE="Data Sources",
     SETTINGS_SCREEN_TITLE="Settings",

@@ -17,13 +17,12 @@ from typing import (
     Any,
     AsyncGenerator,
     ClassVar,
+    Final,
     Iterable,
 )
 
 from rich.align import Align
 from rich.text import Text
-from typing_extensions import Final
-
 from textual import on, work
 from textual.binding import Binding, BindingType
 from textual.containers import Horizontal, Vertical
@@ -38,13 +37,12 @@ from textual.widgets import Button, Input, Label, LoadingIndicator, OptionList
 from textual.widgets.option_list import Option
 from textual.worker import get_current_worker
 
-from word_app.ui.screens.help import HelpScreen
-
 if TYPE_CHECKING:
-    from textual.app import App, ComposeResult
+    from textual.app import ComposeResult
 
 from word_app.lex import EN_LANG
 from word_app.ui.constants import HELP_HCLICK_ICON
+from word_app.ui.screens.help import HelpScreen
 from word_app.ui.screens.quick_search._models import Hit, Hits
 from word_app.ui.screens.quick_search._providers import Provider, ProviderSource
 from word_app.ui.screens.quick_search._widgets import (
@@ -177,6 +175,26 @@ class SuggestionPalette(ModalScreen[ScreenResultType], inherit_css=False):
         ),
     ]
 
+    _BELOW_CLASS = "below"
+    """Class added to screens below the palette."""
+
+    _BUSY_COUNTDOWN: Final[float] = 0.5
+    """How many seconds to wait for hits to come in before showing busy."""
+
+    _GATHER_SUGGESTIONS_GROUP: Final[str] = (
+        "--suggestion-palette-gather-suggestions"
+    )
+    """The group name of the suggestion gathering worker."""
+
+    _NO_MATCHES: Final[str] = "--no-matches"
+    """The ID to give the disabled option that shows there were no matches."""
+
+    _NO_MATCHES_COUNTDOWN: Final[float] = 0.5
+    """How many seconds to wait before showing 'No matches found'."""
+
+    _RESULT_BATCH_TIME: Final[float] = 0.25
+    """How long to wait before adding suggestions to the suggestion list."""
+
     _list_visible: var[bool] = var(False, init=False)
     """Internal reactive to toggle the visibility of the suggestion list."""
 
@@ -186,8 +204,7 @@ class SuggestionPalette(ModalScreen[ScreenResultType], inherit_css=False):
     _calling_screen: var[Screen[Any] | None] = var(None)
     """A record of the screen that was active when we were called."""
 
-    _BELOW_CLASS = "below"
-
+    # Events
     @dataclass
     class OptionHighlighted(Message):
         """Posted to App when an option is highlighted in the palette."""
@@ -206,6 +223,18 @@ class SuggestionPalette(ModalScreen[ScreenResultType], inherit_css=False):
         option_selected: bool
         """True if an option was selected, False if the palette was closed without selecting an option."""
 
+    # Static methods
+    @staticmethod
+    async def _consume(hits: Hits, suggestions: Queue[Hit]) -> None:
+        """Consume a source of matching suggestions, feeding the given queue.
+
+        Args:
+            hits: The hits to consume.
+            suggestions: The suggestion queue to feed.
+        """
+        async for hit in hits:
+            await suggestions.put(hit)
+
     def __init__(
         self,
         providers: ProviderSource = [],
@@ -215,11 +244,10 @@ class SuggestionPalette(ModalScreen[ScreenResultType], inherit_css=False):
         id: str | None = None,
         classes: str | None = None,
     ) -> None:
-        """Initialise the palette.
+        """Initialize the palette.
 
         Args:
-            providers: An optional list of providers to use. If None, the providers supplied
-                in the App or Screen will be used.
+            providers: An optional list of providers to use.
             placeholder: The placeholder text for the palette.
         """
         super().__init__(
@@ -231,29 +259,27 @@ class SuggestionPalette(ModalScreen[ScreenResultType], inherit_css=False):
 
         self._selected_suggestion: Hit | None = None
         """The suggestion that was selected by the user."""
+
         self._busy_timer: Timer | None = None
         """Keeps track of if there's a busy indication timer in effect."""
+
         self._no_matches_timer: Timer | None = None
-        """Keeps track of if there are 'No matches found' message waiting to be displayed."""
+        """
+        Keeps track of if there are 'No matches found' message waiting
+        to be displayed.
+        """
+
         self._supplied_providers: ProviderSource = providers
+
         self._providers: list[Provider] = []
         """List of Provider instances involved in searches."""
+
         self._hit_count: int = 0
         """Number of hits displayed."""
+
         self._placeholder = placeholder
 
-    @staticmethod
-    def is_open(app: App[object]) -> bool:
-        """Is a palette current open?
-
-        Args:
-            app: The app to test.
-
-        Returns:
-            `True` if a palette is currently open, `False` if not.
-        """
-        return app.screen.has_class("--suggestion-palette")
-
+    # Properties
     @property
     def _provider_classes(self) -> set[type[Provider]]:
         """The currently available providers."""
@@ -278,171 +304,33 @@ class SuggestionPalette(ModalScreen[ScreenResultType], inherit_css=False):
 
         return {*get_providers(self._supplied_providers)}
 
-    def compose(self) -> ComposeResult:
-        """Compose the palette.
+    # Private methods
+    def _cancel_gather_suggestions(self) -> None:
+        """Cancel any operation that is gather suggestions."""
+        self.workers.cancel_group(self, self._GATHER_SUGGESTIONS_GROUP)
 
-        Returns:
-            The content of the screen.
-        """
-        help_label = Label(HELP_HCLICK_ICON, id="help-icon")
-        help_label.tooltip = EN_LANG.QUICK_SEATCH_TOOLTIP
-        with Vertical(id="--container"):
-            with Horizontal(id="--input"):
-                yield SuggestionIcon()
-                yield help_label
-                yield SuggestionInput(
-                    placeholder=self._placeholder, select_on_focus=False
-                )
-            with Vertical(id="--results"):
-                yield SuggestionList()
-                yield LoadingIndicator()
-
-    def _on_click(self, event: Click) -> None:  # type: ignore[override]
-        """Handle the click event.
+    def _refresh_suggestion_list(
+        self,
+        suggestion_list: SuggestionList,
+        suggestions: list[Suggestion],
+    ) -> None:
+        """Refresh the suggestion list.
 
         Args:
-            event: The click event.
-
-        This method is used to allow clicking on the 'background' as a
-        method of dismissing the palette.
+            suggestion_list: The widget that shows the list of suggestions.
+            suggestions: The suggestions to show in the widget.
         """
-        if w := event.widget:
-            if w.id == "help-icon":
-                self._action_show_help()
 
-        if self.get_widget_at(event.screen_x, event.screen_y)[0] is self:
-            self._cancel_gather_suggestions()
-            self.app.post_message(
-                SuggestionPalette.Closed(option_selected=False)
-            )
-            self.dismiss()
-
-    def _on_mount(self, event: Mount) -> None:
-        """Configure the palette once the DOM is ready."""
-        self.app.post_message(SuggestionPalette.Opened())
-        self._calling_screen = self.app.screen_stack[-2]
-        self._calling_screen.add_class(self._BELOW_CLASS)
-
-        match_style = self.get_visual_style(
-            "suggestion-palette--highlight", partial=True
+        sorted_suggestions = sorted(
+            suggestions, key=attrgetter("hit.score"), reverse=True
         )
+        suggestion_list.clear_options().add_options(sorted_suggestions)
 
-        assert self._calling_screen is not None
-        self._providers = [
-            provider_class(self._calling_screen, match_style)
-            for provider_class in self._provider_classes
-        ]
-        for provider in self._providers:
-            provider._post_init()
-        self._gather_suggestions("")
+        if sorted_suggestions:
+            suggestion_list.highlighted = 0
 
-    async def _on_unmount(self) -> None:  # type: ignore[override]
-        """Shutdown providers when palette is closed."""
-        if self._providers:
-            await wait(
-                [
-                    create_task(provider._shutdown())
-                    for provider in self._providers
-                ],
-            )
-            self._providers.clear()
-        if screen := self._calling_screen:
-            screen.remove_class(self._BELOW_CLASS)
-
-    def _stop_busy_countdown(self) -> None:
-        """Stop any busy countdown that's in effect."""
-        if self._busy_timer is not None:
-            self._busy_timer.stop()
-            self._busy_timer = None
-
-    _BUSY_COUNTDOWN: Final[float] = 0.5
-    """How many seconds to wait for suggestions to come in before showing we're busy."""
-
-    def _start_busy_countdown(self) -> None:
-        """Start a countdown to showing that we're busy searching."""
-        self._stop_busy_countdown()
-
-        def _become_busy() -> None:
-            if self._list_visible:
-                self._show_busy = True
-
-        self._busy_timer = self.set_timer(self._BUSY_COUNTDOWN, _become_busy)
-
-    def _stop_no_matches_countdown(self) -> None:
-        """Stop any 'No matches' countdown that's in effect."""
-        if self._no_matches_timer is not None:
-            self._no_matches_timer.stop()
-            self._no_matches_timer = None
-
-    _NO_MATCHES_COUNTDOWN: Final[float] = 0.5
-    """How many seconds to wait before showing 'No matches found'."""
-
-    def _start_no_matches_countdown(self, search_value: str) -> None:
-        """Start a countdown to showing that there are no matches for the query.
-
-        Args:
-            search_value: The value being searched for.
-
-        Adds a 'No matches found' option to the suggestion list after
-        `_NO_MATCHES_COUNTDOWN` seconds.
-        """
-        self._stop_no_matches_countdown()
-
-        def _show_no_matches() -> None:
-            # If we were actually searching for something, show that we
-            # found no matches.
-            if search_value:
-                suggestion_list = self.query_one(SuggestionList)
-                suggestion_list.add_option(
-                    Option(
-                        Align.center(
-                            Text("No matches found", style="not bold")
-                        ),
-                        disabled=True,
-                        id=self._NO_MATCHES,
-                    )
-                )
-                self._list_visible = True
-            else:
-                self._list_visible = False
-
-        self._no_matches_timer = self.set_timer(
-            self._NO_MATCHES_COUNTDOWN,
-            _show_no_matches,
-        )
-
-    def _watch__list_visible(self) -> None:
-        """React to the list visible flag being toggled."""
-        self.query_one(SuggestionList).set_class(
-            self._list_visible, "--visible"
-        )
-        self.query_one("#--input", Horizontal).set_class(
-            self._list_visible, "--list-visible"
-        )
-        if not self._list_visible:
-            self._show_busy = False
-
-    async def _watch__show_busy(self) -> None:
-        """React to the show busy flag being toggled.
-
-        This watcher adds or removes a busy indication depending on the
-        flag's state.
-        """
-        self.query_one(LoadingIndicator).set_class(self._show_busy, "--visible")
-        self.query_one(SuggestionList).set_class(
-            self._show_busy, "--populating"
-        )
-
-    @staticmethod
-    async def _consume(hits: Hits, suggestions: Queue[Hit]) -> None:
-        """Consume a source of matching suggestions, feeding the given suggestion queue.
-
-        Args:
-            hits: The hits to consume.
-            suggestions: The suggestion queue to feed.
-        """
-        async for hit in hits:
-            await suggestions.put(hit)
+        self._list_visible = bool(suggestion_list.option_count)
+        self._hit_count = suggestion_list.option_count
 
     async def _search_for(self, search_value: str) -> AsyncGenerator[Hit, bool]:
         """Search for a given search value amongst all of the providers.
@@ -529,43 +417,271 @@ class SuggestionPalette(ModalScreen[ScreenResultType], inherit_css=False):
             for search in searches:
                 search.cancel()
 
-    def _refresh_suggestion_list(
-        self,
-        suggestion_list: SuggestionList,
-        suggestions: list[Suggestion],
-        clear_current: bool,
-    ) -> None:
-        """Refresh the suggestion list.
+    def _start_busy_countdown(self) -> None:
+        """Start a countdown to showing that we're busy searching."""
+        self._stop_busy_countdown()
+
+        def _become_busy() -> None:
+            if self._list_visible:
+                self._show_busy = True
+
+        self._busy_timer = self.set_timer(self._BUSY_COUNTDOWN, _become_busy)
+
+    def _stop_busy_countdown(self) -> None:
+        """Stop any busy countdown that's in effect."""
+        if self._busy_timer is not None:
+            self._busy_timer.stop()
+            self._busy_timer = None
+
+    def _stop_no_matches_countdown(self) -> None:
+        """Stop any 'No matches' countdown that's in effect."""
+        if self._no_matches_timer is not None:
+            self._no_matches_timer.stop()
+            self._no_matches_timer = None
+
+    def _start_no_matches_countdown(self, search_value: str) -> None:
+        """Start a countdown to showing that there are no matches for the query.
 
         Args:
-            suggestion_list: The widget that shows the list of suggestions.
-            suggestions: The suggestions to show in the widget.
-            clear_current: Should the current content of the list be cleared first?
+            search_value: The value being searched for.
+
+        Adds a 'No matches found' option to the suggestion list after
+        `_NO_MATCHES_COUNTDOWN` seconds.
         """
+        self._stop_no_matches_countdown()
 
-        sorted_suggestions = sorted(
-            suggestions, key=attrgetter("hit.score"), reverse=True
+        def _show_no_matches() -> None:
+            # If we were actually searching for something, show that we
+            # found no matches.
+            if search_value:
+                suggestion_list = self.query_one(SuggestionList)
+                suggestion_list.add_option(
+                    Option(
+                        Align.center(
+                            Text("No matches found", style="not bold")
+                        ),
+                        disabled=True,
+                        id=self._NO_MATCHES,
+                    )
+                )
+                self._list_visible = True
+            else:
+                self._list_visible = False
+
+        self._no_matches_timer = self.set_timer(
+            self._NO_MATCHES_COUNTDOWN,
+            _show_no_matches,
         )
-        suggestion_list.clear_options().add_options(sorted_suggestions)
 
-        if sorted_suggestions:
+    def _watch__list_visible(self) -> None:
+        """React to the list visible flag being toggled."""
+        self.query_one(SuggestionList).set_class(
+            self._list_visible, "--visible"
+        )
+        self.query_one("#--input", Horizontal).set_class(
+            self._list_visible, "--list-visible"
+        )
+        if not self._list_visible:
+            self._show_busy = False
+
+    async def _watch__show_busy(self) -> None:
+        """React to the show busy flag being toggled.
+
+        This watcher adds or removes a busy indication depending on the
+        flag's state.
+        """
+        self.query_one(LoadingIndicator).set_class(self._show_busy, "--visible")
+        self.query_one(SuggestionList).set_class(
+            self._show_busy, "--populating"
+        )
+
+    # Public methods
+    def compose(self) -> ComposeResult:
+        """Compose the palette.
+
+        Returns:
+            The content of the screen.
+        """
+        help_label = Label(HELP_HCLICK_ICON, id="help-icon")
+        help_label.tooltip = EN_LANG.QUICK_SEATCH_TOOLTIP
+        with Vertical(id="--container"):
+            with Horizontal(id="--input"):
+                yield SuggestionIcon()
+                yield help_label
+                yield SuggestionInput(
+                    placeholder=self._placeholder, select_on_focus=False
+                )
+            with Vertical(id="--results"):
+                yield SuggestionList()
+                yield LoadingIndicator()
+
+    # Event handlers
+    @on(Input.Changed)
+    def _input(self, event: Input.Changed) -> None:
+        """Listen to Input.Changed."""
+        event.stop()
+        self._cancel_gather_suggestions()
+        self._stop_no_matches_countdown()
+        self._gather_suggestions(event.value.strip())
+
+    def _on_click(self, event: Click) -> None:  # type: ignore[override]
+        """Handle the click events"""
+        if w := event.widget:
+            if w.id == "help-icon":
+                self._action_show_help()
+
+        if self.get_widget_at(event.screen_x, event.screen_y)[0] is self:
+            self._cancel_gather_suggestions()
+            self.app.post_message(
+                SuggestionPalette.Closed(option_selected=False)
+            )
+            self.dismiss()
+
+    async def _on_key(self, event: Key) -> None:
+        """Handle key events."""
+        if event.character == "\x08":
+            self._action_show_help()
+
+    def _on_mount(self, event: Mount) -> None:
+        """Configure the palette once the DOM is ready."""
+        self.app.post_message(SuggestionPalette.Opened())
+        self._calling_screen = self.app.screen_stack[-2]
+        self._calling_screen.add_class(self._BELOW_CLASS)
+
+        match_style = self.get_visual_style(
+            "suggestion-palette--highlight", partial=True
+        )
+
+        assert self._calling_screen is not None
+        self._providers = [
+            provider_class(self._calling_screen, match_style)
+            for provider_class in self._provider_classes
+        ]
+        for provider in self._providers:
+            provider._post_init()
+        self._gather_suggestions("")
+
+    async def _on_unmount(self) -> None:  # type: ignore[override]
+        """Shutdown providers when palette is closed."""
+        if self._providers:
+            await wait(
+                [
+                    create_task(provider._shutdown())
+                    for provider in self._providers
+                ],
+            )
+            self._providers.clear()
+        if screen := self._calling_screen:
+            screen.remove_class(self._BELOW_CLASS)
+
+    @on(Input.Submitted)
+    @on(Button.Pressed)
+    def _select_or_suggest(
+        self, event: Input.Submitted | Button.Pressed | None = None
+    ) -> None:
+        """Depending on context, select or execute a suggestion."""
+        # If the list is visible, that means we're in "pick a suggetion"
+        # mode...
+        if event is not None:
+            event.stop()
+        if self._list_visible:
+            suggestion_list = self.query_one(SuggestionList)
+            # ...so if nothing in the list is highlighted yet...
+            if suggestion_list.highlighted is None:
+                # ...cause the first completion to be highlighted.
+                self._action_cursor_down()
+                # If there is one option, assume the user wants to select it
+                if suggestion_list.option_count == 1:
+                    # Call after a short delay to provide a little visual feedback
+                    self._action_suggestion_list("select")
+            else:
+                # The list is visible, something is highlighted, the user
+                # made a selection "gesture"; let's go select it!
+                self._action_suggestion_list("select")
+        else:
+            # The list isn't visible, which means that if we have a
+            # suggestion...
+            if self._selected_suggestion is not None:
+                # ...we should return it to the parent screen and let it
+                # decide what to do with it (hopefully it'll run it).
+                self._cancel_gather_suggestions()
+                self.app.post_message(
+                    SuggestionPalette.Closed(option_selected=True)
+                )
+                self.app._delay_update()
+                self.dismiss()
+                self.app.call_later(self._selected_suggestion.action)
+
+    @on(OptionList.OptionSelected)
+    def _select_suggestion(self, event: OptionList.OptionSelected) -> None:
+        """Listen to OptionList.OptionSelected."""
+        event.stop()
+        self._cancel_gather_suggestions()
+        input = self.query_one(SuggestionInput)
+        with self.prevent(Input.Changed):
+            assert isinstance(event.option, Suggestion)
+            hit = event.option.hit
+            input.value = str(hit.text)
+            self._selected_suggestion = hit
+        input.action_end()
+        self._list_visible = False
+        self.query_one(SuggestionList).clear_options()
+        self._hit_count = 0
+        self._select_or_suggest()
+
+    @on(OptionList.OptionHighlighted)
+    def _stop_event_leak(self, event: OptionList.OptionHighlighted) -> None:
+        """Stop any unused events so they don't leak to the application."""
+        event.stop()
+        self.app.post_message(
+            SuggestionPalette.OptionHighlighted(highlighted_event=event)
+        )
+
+    # Action methods.
+    def _action_cursor_down(self) -> None:
+        """Handle the cursor down action.
+
+        This allows the cursor down key to either open the suggestion list, if
+        it's closed but has options, or if it's open with options just
+        cursor through them.
+        """
+        suggestion_list = self.query_one(SuggestionList)
+        if suggestion_list.option_count and not self._list_visible:
+            self._list_visible = True
             suggestion_list.highlighted = 0
+        elif (
+            suggestion_list.option_count
+            and not suggestion_list.get_option_at_index(0).id
+            == self._NO_MATCHES
+        ):
+            self._action_suggestion_list("cursor_down")
 
-        self._list_visible = bool(suggestion_list.option_count)
-        self._hit_count = suggestion_list.option_count
+    def _action_escape(self) -> None:
+        """Handle a request to escape out of the palette."""
+        self._cancel_gather_suggestions()
+        self.app.post_message(SuggestionPalette.Closed(option_selected=False))
+        self.dismiss()
 
-    _RESULT_BATCH_TIME: Final[float] = 0.25
-    """How long to wait before adding suggestions to the suggestion list."""
+    def _action_show_help(self):
+        self.app.push_screen(
+            HelpScreen(
+                EN_LANG.QUICK_SEARCH_HELP, title="Help", button=EN_LANG.CLOSE
+            )
+        )
 
-    _NO_MATCHES: Final[str] = "--no-matches"
-    """The ID to give the disabled option that shows there were no matches."""
+    def _action_suggestion_list(self, action: str) -> None:
+        """Pass an action on to the SuggestionList.
 
-    _GATHER_SUGGESTIONS_GROUP: Final[str] = (
-        "--suggestion-palette-gather-suggestions"
-    )
-    """The group name of the suggestion gathering worker."""
-    # TODO: This should be passed on widget init or created via seed.
+        Args:
+            action: The action to pass on to the SuggestionList.
+        """
+        try:
+            cbl = getattr(self.query_one(SuggestionList), f"action_{action}")
+        except AttributeError:
+            return
+        cbl()
 
+    # Worker methods
     @work(exclusive=True, group=_GATHER_SUGGESTIONS_GROUP)
     async def _gather_suggestions(self, search_value: str) -> None:
         """Gather up all of the suggestions that match the search value.
@@ -602,12 +718,6 @@ class SuggestionPalette(ModalScreen[ScreenResultType], inherit_css=False):
 
         # Reset busy mode.
         self._show_busy = False
-
-        # A flag to keep track of if the current content of the hit
-        # list needs to be cleared. The initial clear *should* be in
-        # `_input`, but doing so caused an unsightly "flash" of the list; so
-        # here we sacrifice "correct" code for a better-looking UI.
-        clear_current = True
 
         # We're going to batch updates over time, so start off pretending
         # we've just done an update.
@@ -661,9 +771,9 @@ class SuggestionPalette(ModalScreen[ScreenResultType], inherit_css=False):
             now = monotonic()
             if (now - last_update) > self._RESULT_BATCH_TIME:
                 self._refresh_suggestion_list(
-                    suggestion_list, gathered_suggestions, clear_current
+                    suggestion_list,
+                    gathered_suggestions,
                 )
-                clear_current = False
                 last_update = now
 
             suggestion_id += 1
@@ -679,9 +789,7 @@ class SuggestionPalette(ModalScreen[ScreenResultType], inherit_css=False):
         # On the way out, if we're still in play, ensure everything has been
         # dropped into the suggestion list.
         if not worker.is_cancelled:
-            self._refresh_suggestion_list(
-                suggestion_list, gathered_suggestions, clear_current
-            )
+            self._refresh_suggestion_list(suggestion_list, gathered_suggestions)
 
         # One way or another, we're not busy any more.
         self._show_busy = False
@@ -694,135 +802,3 @@ class SuggestionPalette(ModalScreen[ScreenResultType], inherit_css=False):
             self._start_no_matches_countdown(search_value)
 
         self.add_class("-ready")
-
-    def _cancel_gather_suggestions(self) -> None:
-        """Cancel any operation that is gather suggestions."""
-        self.workers.cancel_group(self, self._GATHER_SUGGESTIONS_GROUP)
-
-    @on(Input.Changed)
-    def _input(self, event: Input.Changed) -> None:
-        """React to input in the palette.
-
-        Args:
-            event: The input event.
-        """
-        event.stop()
-        self._cancel_gather_suggestions()
-        self._stop_no_matches_countdown()
-        self._gather_suggestions(event.value.strip())
-
-    @on(OptionList.OptionSelected)
-    def _select_suggestion(self, event: OptionList.OptionSelected) -> None:
-        """React to a suggestion being selected from the dropdown.
-
-        Args:
-            event: The option selection event.
-        """
-        event.stop()
-        self._cancel_gather_suggestions()
-        input = self.query_one(SuggestionInput)
-        with self.prevent(Input.Changed):
-            assert isinstance(event.option, Suggestion)
-            hit = event.option.hit
-            input.value = str(hit.text)
-            self._selected_suggestion = hit
-        input.action_end()
-        self._list_visible = False
-        self.query_one(SuggestionList).clear_options()
-        self._hit_count = 0
-        self._select_or_suggest()
-
-    @on(Input.Submitted)
-    @on(Button.Pressed)
-    def _select_or_suggest(
-        self, event: Input.Submitted | Button.Pressed | None = None
-    ) -> None:
-        """Depending on context, select or execute a suggestion."""
-        # If the list is visible, that means we're in "pick a suggetion"
-        # mode...
-        if event is not None:
-            event.stop()
-        if self._list_visible:
-            suggestion_list = self.query_one(SuggestionList)
-            # ...so if nothing in the list is highlighted yet...
-            if suggestion_list.highlighted is None:
-                # ...cause the first completion to be highlighted.
-                self._action_cursor_down()
-                # If there is one option, assume the user wants to select it
-                if suggestion_list.option_count == 1:
-                    # Call after a short delay to provide a little visual feedback
-                    self._action_suggestion_list("select")
-            else:
-                # The list is visible, something is highlighted, the user
-                # made a selection "gesture"; let's go select it!
-                self._action_suggestion_list("select")
-        else:
-            # The list isn't visible, which means that if we have a
-            # suggestion...
-            if self._selected_suggestion is not None:
-                # ...we should return it to the parent screen and let it
-                # decide what to do with it (hopefully it'll run it).
-                self._cancel_gather_suggestions()
-                self.app.post_message(
-                    SuggestionPalette.Closed(option_selected=True)
-                )
-                self.app._delay_update()
-                self.dismiss()
-                self.app.call_later(self._selected_suggestion.action)
-
-    @on(OptionList.OptionHighlighted)
-    def _stop_event_leak(self, event: OptionList.OptionHighlighted) -> None:
-        """Stop any unused events so they don't leak to the application."""
-        event.stop()
-        self.app.post_message(
-            SuggestionPalette.OptionHighlighted(highlighted_event=event)
-        )
-
-    @on(Key)
-    def _on_key_press(self, event: Key) -> None:
-        """Handle key events."""
-        if event.character == "\x08":
-            self._action_show_help()
-
-    def _action_escape(self) -> None:
-        """Handle a request to escape out of the palette."""
-        self._cancel_gather_suggestions()
-        self.app.post_message(SuggestionPalette.Closed(option_selected=False))
-        self.dismiss()
-
-    def _action_show_help(self):
-        self.app.push_screen(
-            HelpScreen(
-                EN_LANG.QUICK_SEARCH_HELP, title="Help", button=EN_LANG.CLOSE
-            )
-        )
-
-    def _action_suggestion_list(self, action: str) -> None:
-        """Pass an action on to the SuggestionList.
-
-        Args:
-            action: The action to pass on to the SuggestionList.
-        """
-        try:
-            cbl = getattr(self.query_one(SuggestionList), f"action_{action}")
-        except AttributeError:
-            return
-        cbl()
-
-    def _action_cursor_down(self) -> None:
-        """Handle the cursor down action.
-
-        This allows the cursor down key to either open the suggestion list, if
-        it's closed but has options, or if it's open with options just
-        cursor through them.
-        """
-        suggestion_list = self.query_one(SuggestionList)
-        if suggestion_list.option_count and not self._list_visible:
-            self._list_visible = True
-            suggestion_list.highlighted = 0
-        elif (
-            suggestion_list.option_count
-            and not suggestion_list.get_option_at_index(0).id
-            == self._NO_MATCHES
-        ):
-            self._action_suggestion_list("cursor_down")

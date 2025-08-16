@@ -20,11 +20,7 @@ ProviderSource: TypeAlias = (
 
 
 class Provider(ABC):
-    """Base class for suggestion palette providers.
-
-    To create new suggestion provider, inherit from this class and implement
-    .search().
-    """
+    """Base class for suggestion palette providers."""
 
     def __init__(
         self, screen: Screen[Any], match_style: Style | None = None
@@ -36,7 +32,8 @@ class Provider(ABC):
         """
         if match_style is not None:
             assert isinstance(match_style, Style), (
-                "match_style must be a Visual style (from textual.style import Style)"
+                "match_style must be a Visual style "
+                "(from textual.style import Style)"
             )
         self.__screen = screen
         self.__match_style = match_style
@@ -45,15 +42,12 @@ class Provider(ABC):
 
     @property
     def focused(self) -> Widget | None:
-        """The currently-focused widget in the currently-active screen in the application.
-
-        If no widget has focus this will be `None`.
-        """
+        """The currently-focused widget in the currently-active screen."""
         return self.__screen.focused
 
     @property
     def screen(self) -> Screen[object]:
-        """The currently-active screen in the application."""
+        """The currently-active screen."""
         return self.__screen
 
     @property
@@ -67,14 +61,14 @@ class Provider(ABC):
         return self.__match_style
 
     def matcher(self, user_input: str, case_sensitive: bool = False) -> Matcher:
-        """Create a [fuzzy matcher][textual.fuzzy.Matcher] for the given user input.
+        """Create a `textual.fuzzy.Matcher` for the given input.
 
         Args:
             user_input: The text that the user has input.
             case_sensitive: Should matching be case sensitive?
 
         Returns:
-            A [fuzzy matcher][textual.fuzzy.Matcher] object for matching against candidate hits.
+            A `textual.fuzzy.Matcher` object for matching against candidates.
         """
         return Matcher(
             user_input,
@@ -105,7 +99,9 @@ class Provider(ABC):
         self._init_task = None
 
     async def startup(self) -> None:
-        """Called after the Provider is initialized, but before any calls to `search`."""
+        """
+        Called after Provider is initialized, but before any calls to `search`.
+        """
 
     async def _search(self, query: str) -> Hits:
         """Internal method to perform search.

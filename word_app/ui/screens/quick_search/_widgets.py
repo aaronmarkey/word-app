@@ -31,7 +31,6 @@ class Suggestion(Option):
         """
         super().__init__(prompt, id, disabled)
         self.hit = hit
-        """The details of the hit associated with the option."""
 
     def __hash__(self) -> int:
         return id(self)

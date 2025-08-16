@@ -1,9 +1,8 @@
 from dataclasses import dataclass
-from typing import AsyncIterator
+from typing import AsyncIterator, TypeAlias
 
 from textual.types import IgnoreReturnCallbackType
 from textual.visual import VisualType
-from typing_extensions import TypeAlias
 
 
 @dataclass
@@ -11,10 +10,7 @@ class Hit:
     """Holds the details of a single search hit."""
 
     score: float
-    """The score of the hit.
-
-    The value should be between 0 (no match) and 1 (complete match).
-    """
+    """The score of the hit, a float between 0 and 1."""
 
     match_display: VisualType
     """A string or Rich renderable representation of the hit."""
@@ -25,8 +21,8 @@ class Hit:
     text: str | None = None
     """The text associated with the hit, as plain text.
 
-    If `match_display` is not simple text, this attribute should be provided by the
-    Provider object.
+    If `match_display` is not simple text, this attribute should be provided
+    by the Provider object.
     """
 
     help: str | None = None

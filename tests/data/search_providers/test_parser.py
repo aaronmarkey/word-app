@@ -1,6 +1,6 @@
 import pytest
 
-from word_app.search import parser
+from word_app.data.search_providers import parser
 
 
 @pytest.mark.parametrize(

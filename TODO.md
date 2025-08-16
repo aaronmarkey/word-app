@@ -24,11 +24,18 @@
   - [x] CSS
   - [x] Design
   - [x] Initialize with runtime dependencies
-  - [ ] Real search providers
+  - [x] Real search providers
+  - [ ] Clean up code in DatamuseSearchProvider and DatamuseClient classes
+  - [ ] Add (?) hover for help tooltip.
+  - [x] Result caching on search palette
 - [x] Faker Provider
 
 
 ## Misc
+- [ ] General project clean up.
+  - [ ] Reorg code to better directory structure.
+  - [ ] Ruff config: check import order.
+  - [ ] Document things.
 - [x] Rethink session/cmd-line conf differences.
 - [x] Replace theme variables with "interace-color" and "hover-color"
 - [x] Defaults in UserConf class.

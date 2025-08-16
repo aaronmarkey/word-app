@@ -1,10 +1,12 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+from http import HTTPStatus
 from typing import AsyncGenerator
 
 import httpx
 
+from word_app.lib.datamuse.exceptions import FailedToRefetchResult
 from word_app.lib.datamuse.models import Suggestion, Word
 
 
@@ -102,25 +104,19 @@ class DatamuseClient:
     def __init__(
         self,
         *,
-        aclient: httpx.AsyncClient | None = None,
-        client: httpx.Client | None = None,
+        client: httpx.AsyncClient | None = None,
         params: DatamuseClientParamsContainer = DatamuseClientParams,
         transformer_cls: type[DatamuseTransformer] = DatamuseTransformer,
     ) -> None:
         params.validate()
         self.params = params
-        self.aclient = aclient or httpx.AsyncClient()
-        self.client = client or httpx.Client()
+        self.client = client or httpx.AsyncClient()
         self.transformer_cls = transformer_cls
 
-    async def aclean(self) -> None:
-        self.clean()
-        await self.aclient.aclose()
+    async def clean(self) -> None:
+        await self.client.aclose()
 
-    def clean(self) -> None:
-        self.client.close()
-
-    async def aget_suggestions(
+    async def get_suggestions(
         self, value: str, *, limit: int = 0
     ) -> AsyncGenerator[Suggestion]:
         if limit > 0:
@@ -130,14 +126,24 @@ class DatamuseClient:
         params: dict[str, str | int] = {"s": value, "max": limit}
         location = self.params.location.full_path("suggest")
 
-        resp = await self.aclient.get(
-            location, params=params, timeout=self.params.timeout
-        )
+        try:
+            resp = await self.client.get(
+                location, params=params, timeout=self.params.timeout
+            )
+            resp.raise_for_status()
+        except (httpx.RequestError, httpx.HTTPError) as exc:
+            raise FailedToRefetchResult() from exc
+
         for data in resp.json():
             yield self.transformer_cls.suggestion(data)
 
-    async def aget_words(
-        self, *, means_like: str = "", limit: int = 0
+    async def get_words(
+        self,
+        *,
+        means_like: str = "",
+        spelled_like: str = "",
+        sounds_like: str = "",
+        limit: int = 0,
     ) -> AsyncGenerator[Word]:
         if limit > 0:
             self.params.limit.validate_limit(limit)
@@ -145,14 +151,19 @@ class DatamuseClient:
             limit = self.params.limit.default
 
         location = self.params.location.full_path("words")
-        arg_map = {"ml": means_like}
+        arg_map = {"ml": means_like, "sl": sounds_like, "sp": spelled_like}
         params: dict[str, str | int] = {"max": limit}
         for name, value in arg_map.items():
             if v := value.strip().lower():
                 params[name] = v
 
-        resp = await self.aclient.get(
-            location, params=params, timeout=self.params.timeout
-        )
+        try:
+            resp = await self.client.get(
+                location, params=params, timeout=self.params.timeout
+            )
+            resp.raise_for_status()
+        except (httpx.RequestError, httpx.HTTPError) as exc:
+            raise FailedToRefetchResult() from exc
+
         for data in resp.json():
             yield self.transformer_cls.word(data)

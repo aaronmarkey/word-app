@@ -11,7 +11,7 @@ from word_app.data.search_providers.parser import (
     SearchTermType,
 )
 from word_app.lib.datamuse.exceptions import DatamuseError
-from word_app.lib.datamuse.client import DatamuseClient
+from word_app.lib.datamuse.client import DatamuseApiClient
 from word_app.lib.datamuse.models import DatamuseModel, Suggestion, Word
 from word_app.ui.screens.quick_search._models import Hit, Hits
 from word_app.ui.screens.quick_search._providers import Provider
@@ -36,7 +36,9 @@ class DatamuseSearchProvider(Provider):
 
     def __init__(self, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
-        self.client: DatamuseClient = kwargs.get("client", DatamuseClient())
+        self.client: DatamuseApiClient = kwargs.get(
+            "client", DatamuseApiClient()
+        )
         self._cache: FIFOCache
 
     def _action(self, word: str):

@@ -26,7 +26,7 @@
   - [x] Initialize with runtime dependencies
   - [x] Real search providers
   - [ ] Clean up code in DatamuseSearchProvider and DatamuseClient classes
-  - [ ] Add (?) hover for help tooltip.
+  - [x] Add (?) hover for help tooltip.
   - [x] Result caching on search palette
 - [x] Faker Provider
 

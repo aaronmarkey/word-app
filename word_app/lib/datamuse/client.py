@@ -1,105 +1,20 @@
 from __future__ import annotations
 
-from dataclasses import dataclass
+from copy import deepcopy
 from typing import AsyncGenerator
 
 import httpx
 
+from word_app.lib.datamuse.conf import (
+    DatamuseClientParamsContainer,
+    DatamuseClientParams,
+)
 from word_app.lib.datamuse.exceptions import FailedToRefetchResult
 from word_app.lib.datamuse.models import Suggestion, Word
+from word_app.lib.datamuse.transformer import DatamuseTransformer
 
 
-def _error(name: str, value: str) -> None:
-    raise ValueError(
-        f"Invalid value of '{value} for Datamuse configration '{name}'."
-    )
-
-
-@dataclass(frozen=True, eq=True)
-class LimitContainer:
-    default: int
-    max: int
-    min: int
-
-    def _validate(self, name: str, value: int) -> None:
-        if not (self.min <= value and value <= self.max):
-            _error(name, str(value))
-
-    def validate(self) -> None:
-        self._validate("default", self.default)
-
-    def validate_limit(self, limit: int) -> None:
-        self._validate("limit", limit)
-
-
-@dataclass(frozen=True, eq=True)
-class LocationContainer:
-    root: str
-    endpoint_suggest: str
-    endpoint_words: str
-
-    def validate(self) -> None:
-        for name, value in [
-            ("root", self.root),
-            ("endpoint_suggest", self.endpoint_suggest),
-            ("endpoint_words", self.endpoint_words),
-        ]:
-            if not value.strip():
-                _error(name, value)
-
-    def full_path(self, endpoint: str) -> str:
-        endpoint = getattr(self, f"endpoint_{endpoint}")
-        return f"{self.root}/{endpoint}"
-
-
-@dataclass(frozen=True, eq=True)
-class DatamuseClientParamsContainer:
-    limit: LimitContainer
-    location: LocationContainer
-    timeout: float | None
-
-    def _validate_timeout(self) -> None:
-        if to := self.timeout:
-            if to < 0.0:
-                _error("timeout", str(to))
-
-    def validate(self) -> None:
-        self.limit.validate()
-        self.location.validate()
-        self._validate_timeout()
-
-
-DatamuseClientParams = DatamuseClientParamsContainer(
-    limit=LimitContainer(max=100, min=1, default=100),
-    location=LocationContainer(
-        root="https://api.datamuse.com",
-        endpoint_suggest="sug",
-        endpoint_words="words",
-    ),
-    timeout=1.0,
-)
-
-
-class DatamuseTransformer:
-    _UNKNOWN_STR: str = "__UNKNOWN__"
-    _UNKNOWN_INT: int = -1
-
-    @classmethod
-    def suggestion(cls: type[DatamuseTransformer], data: dict) -> Suggestion:
-        return Suggestion(
-            word=data.get("word", cls._UNKNOWN_STR),
-            score=data.get("score", cls._UNKNOWN_INT),
-        )
-
-    @classmethod
-    def word(cls: type[DatamuseTransformer], data: dict) -> Word:
-        return Word(
-            word=data.get("word", cls._UNKNOWN_STR),
-            score=data.get("score", cls._UNKNOWN_INT),
-        )
-
-
-class DatamuseClient:
+class DatamuseApiClient:
     def __init__(
         self,
         *,
@@ -112,26 +27,46 @@ class DatamuseClient:
         self.client = client or httpx.AsyncClient()
         self.transformer_cls = transformer_cls
 
+    async def _request(
+        self, *, endpoint: str, params: dict = dict(), limit: int = 0
+    ) -> httpx.Response:
+        iparams = deepcopy(params)
+
+        if limit > 0:
+            self.params.limit.validate_limit(limit)
+        else:
+            limit = self.params.limit.default
+        location = self.params.location.full_path(endpoint)
+
+        iparams["max"] = limit
+
+        kwargs: dict[str, float | dict | None] = {
+            "timeout": self.params.timeout
+        }
+        if params:
+            kwargs["params"] = params
+
+        try:
+            resp = await self.client.get(
+                location,
+                **kwargs,  # type: ignore
+            )
+            resp.raise_for_status()
+            return resp
+        except (httpx.RequestError, httpx.HTTPError) as exc:
+            raise FailedToRefetchResult() from exc
+
     async def clean(self) -> None:
         await self.client.aclose()
 
     async def get_suggestions(
         self, value: str, *, limit: int = 0
     ) -> AsyncGenerator[Suggestion]:
-        if limit > 0:
-            self.params.limit.validate_limit(limit)
-        else:
-            limit = self.params.limit.default
-        params: dict[str, str | int] = {"s": value, "max": limit}
-        location = self.params.location.full_path("suggest")
-
-        try:
-            resp = await self.client.get(
-                location, params=params, timeout=self.params.timeout
-            )
-            resp.raise_for_status()
-        except (httpx.RequestError, httpx.HTTPError) as exc:
-            raise FailedToRefetchResult() from exc
+        resp = await self._request(
+            endpoint="suggest",
+            params={"s": value},
+            limit=limit,
+        )
 
         for data in resp.json():
             yield self.transformer_cls.suggestion(data)
@@ -144,25 +79,17 @@ class DatamuseClient:
         sounds_like: str = "",
         limit: int = 0,
     ) -> AsyncGenerator[Word]:
-        if limit > 0:
-            self.params.limit.validate_limit(limit)
-        else:
-            limit = self.params.limit.default
-
-        location = self.params.location.full_path("words")
         arg_map = {"ml": means_like, "sl": sounds_like, "sp": spelled_like}
-        params: dict[str, str | int] = {"max": limit}
+        params: dict[str, str | int] = {}
         for name, value in arg_map.items():
             if v := value.strip().lower():
                 params[name] = v
 
-        try:
-            resp = await self.client.get(
-                location, params=params, timeout=self.params.timeout
-            )
-            resp.raise_for_status()
-        except (httpx.RequestError, httpx.HTTPError) as exc:
-            raise FailedToRefetchResult() from exc
+        resp = await self._request(
+            endpoint="words",
+            params=params,
+            limit=limit,
+        )
 
         for data in resp.json():
             yield self.transformer_cls.word(data)

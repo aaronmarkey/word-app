@@ -1,5 +1,6 @@
 import pytest
 
+from word_app.data.search_providers import models
 from word_app.data.search_providers import parser
 
 
@@ -7,28 +8,28 @@ from word_app.data.search_providers import parser
     "query, expected_type",
     [
         # Seach by spelling
-        ("a***e", parser.SearchTermType.SPELLED_LIKE),
-        ("a?", parser.SearchTermType.SPELLED_LIKE),
-        ("?a", parser.SearchTermType.SPELLED_LIKE),
-        ("A***E", parser.SearchTermType.SPELLED_LIKE),
-        ("A?", parser.SearchTermType.SPELLED_LIKE),
-        ("?A", parser.SearchTermType.SPELLED_LIKE),
+        ("a***e", models.SearchTermType.SPELLED_LIKE),
+        ("a?", models.SearchTermType.SPELLED_LIKE),
+        ("?a", models.SearchTermType.SPELLED_LIKE),
+        ("A***E", models.SearchTermType.SPELLED_LIKE),
+        ("A?", models.SearchTermType.SPELLED_LIKE),
+        ("?A", models.SearchTermType.SPELLED_LIKE),
         # Seach by sounds-like and auto-complete
-        ("apple", parser.SearchTermType.SUGGEST_SOUNDS_LIKE),
-        ("ap", parser.SearchTermType.SUGGEST_SOUNDS_LIKE),
-        ("ap0", parser.SearchTermType.SUGGEST_SOUNDS_LIKE),
-        ("ap9", parser.SearchTermType.SUGGEST_SOUNDS_LIKE),
-        ("AP", parser.SearchTermType.SUGGEST_SOUNDS_LIKE),
-        ("AP0", parser.SearchTermType.SUGGEST_SOUNDS_LIKE),
+        ("apple", models.SearchTermType.SUGGEST_SOUNDS_LIKE),
+        ("ap", models.SearchTermType.SUGGEST_SOUNDS_LIKE),
+        ("ap0", models.SearchTermType.SUGGEST_SOUNDS_LIKE),
+        ("ap9", models.SearchTermType.SUGGEST_SOUNDS_LIKE),
+        ("AP", models.SearchTermType.SUGGEST_SOUNDS_LIKE),
+        ("AP0", models.SearchTermType.SUGGEST_SOUNDS_LIKE),
         # Seach by means-like and auto-complete
-        ("apple ", parser.SearchTermType.SUGGEST_MEANS_LIKE),
-        ("app ", parser.SearchTermType.SUGGEST_MEANS_LIKE),
-        ("apple-core", parser.SearchTermType.SUGGEST_MEANS_LIKE),
-        ("apple-core ", parser.SearchTermType.SUGGEST_MEANS_LIKE),
-        ("APPLE-CORE ", parser.SearchTermType.SUGGEST_MEANS_LIKE),
+        ("apple ", models.SearchTermType.SUGGEST_MEANS_LIKE),
+        ("app ", models.SearchTermType.SUGGEST_MEANS_LIKE),
+        ("apple-core", models.SearchTermType.SUGGEST_MEANS_LIKE),
+        ("apple-core ", models.SearchTermType.SUGGEST_MEANS_LIKE),
+        ("APPLE-CORE ", models.SearchTermType.SUGGEST_MEANS_LIKE),
         # Unknown
-        ("%4dasdf", parser.SearchTermType.UNKNOWN),
-        ("%4dASaf", parser.SearchTermType.UNKNOWN),
+        ("%4dasdf", models.SearchTermType.UNKNOWN),
+        ("%4dASaf", models.SearchTermType.UNKNOWN),
     ],
 )
 def test__RegexSearchTermParser__parse(query, expected_type):

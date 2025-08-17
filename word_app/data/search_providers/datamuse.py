@@ -4,11 +4,13 @@ from typing import Callable
 from cachetools import FIFOCache
 from textual.fuzzy import Matcher
 
-from word_app.data.search_providers.models import SearchSuggestionType
+from word_app.data.search_providers.models import (
+    SearchResultType,
+    SearchTermType,
+)
 from word_app.data.search_providers.parser import (
     ParseResult,
     RegexSearchTermParser,
-    SearchTermType,
 )
 from word_app.lib.datamuse.exceptions import DatamuseError
 from word_app.lib.datamuse.client import DatamuseApiClient
@@ -49,6 +51,12 @@ class DatamuseSearchProvider(Provider):
         return __action
 
     def _clean_hits(self, hits: list[Hit]) -> list[Hit]:
+        """Clean up a list of hits.
+
+        Notes:
+            - Remove duplicates, the one with a higher score stays.
+            - Sort hits, remove ones with score below class threshhold.
+        """
         as_dict: dict[str | None, Hit] = {}
         for hit in hits:
             current = as_dict.get(hit.text, None)
@@ -64,7 +72,7 @@ class DatamuseSearchProvider(Provider):
     def _make_hit(
         self,
         dm: DatamuseModel,
-        sug_type: SearchSuggestionType,
+        sug_type: SearchResultType,
         matcher: Matcher,
         highest_score: int | float,
         lowest_score: int | float,
@@ -79,6 +87,23 @@ class DatamuseSearchProvider(Provider):
             help=f"{sug_type.display} ({round(score, 4)})",
         )
 
+    def _make_hits(
+        self, query: str, objs: list[DatamuseModel], str: SearchResultType
+    ) -> list[Hit]:
+        matcher = self.matcher(query)
+        highest_score = max(*objs, key=lambda o: o.score).score
+        lowest_score = min(*objs, key=lambda o: o.score).score
+        return [
+            self._make_hit(
+                o,
+                str,
+                matcher,
+                highest_score,
+                lowest_score,
+            )
+            for o in objs
+        ]
+
     def _parse_query(self, query: str) -> ParseResult:
         query = query.strip().lower()
         parser = RegexSearchTermParser()
@@ -90,8 +115,21 @@ class DatamuseSearchProvider(Provider):
             return ParseResult(type=SearchTermType.UNKNOWN, text=query)
         return result
 
-    async def _fetch_means_like(self, query: str) -> list[Hit]:
-        matcher = self.matcher(query)
+    async def _fetch(self, query: str, *fetchers: Callable) -> list[list[Hit]]:
+        objs: list[
+            tuple[SearchResultType, list[DatamuseModel]]
+        ] = await asyncio.gather(*[fetcher(query) for fetcher in fetchers])
+
+        results: list[list[Hit]] = []
+
+        for srt, obj in objs:
+            results.append(self._make_hits(query, obj, srt))
+
+        return results
+
+    async def _fetch_means_like(
+        self, query: str
+    ) -> tuple[SearchResultType, list[Word]]:
         words: list[Word] = []
         try:
             async for suggestion in self.client.get_words(
@@ -101,23 +139,12 @@ class DatamuseSearchProvider(Provider):
         except DatamuseError:
             pass
 
-        highest_score = max(*words, key=lambda w: w.score).score
-        lowest_score = min(*words, key=lambda w: w.score).score
-        return [
-            self._make_hit(
-                w,
-                SearchSuggestionType.MEANS_LIKE,
-                matcher,
-                highest_score,
-                lowest_score,
-            )
-            for w in words
-        ]
+        return SearchResultType.MEANS_LIKE, words
 
-    async def _fetch_sounds_like(self, query: str) -> list[Hit]:
-        matcher = self.matcher(query)
+    async def _fetch_sounds_like(
+        self, query: str
+    ) -> tuple[SearchResultType, list[Word]]:
         words: list[Word] = []
-
         try:
             async for suggestion in self.client.get_words(
                 sounds_like=query, limit=self._API_LIMIT
@@ -126,22 +153,12 @@ class DatamuseSearchProvider(Provider):
         except DatamuseError:
             pass
 
-        highest_score = max(*words, key=lambda w: w.score).score
-        lowest_score = min(*words, key=lambda w: w.score).score
-        return [
-            self._make_hit(
-                w,
-                SearchSuggestionType.SOUNDS_LIKE,
-                matcher,
-                highest_score,
-                lowest_score,
-            )
-            for w in words
-        ]
+        return SearchResultType.SOUNDS_LIKE, words
 
-    async def _fetch_spelled_like(self, query: str) -> list[Hit]:
+    async def _fetch_spelled_like(
+        self, query: str
+    ) -> tuple[SearchResultType, list[Word]]:
         query = query.replace("*", "#").replace("?", "*").replace("#", "?")
-        matcher = self.matcher(query)
         words: list[Word] = []
 
         try:
@@ -150,21 +167,11 @@ class DatamuseSearchProvider(Provider):
         except DatamuseError:
             pass
 
-        highest_score = max(*words, key=lambda w: w.score).score
-        lowest_score = min(*words, key=lambda w: w.score).score
-        return [
-            self._make_hit(
-                w,
-                SearchSuggestionType.SPELLED_LIKE,
-                matcher,
-                highest_score,
-                lowest_score,
-            )
-            for w in words
-        ]
+        return SearchResultType.SPELLED_LIKE, words
 
-    async def _fetch_suggestions(self, query: str) -> list[Hit]:
-        matcher = self.matcher(query)
+    async def _fetch_suggestions(
+        self, query: str
+    ) -> tuple[SearchResultType, list[Suggestion]]:
         suggestions: list[Suggestion] = []
 
         try:
@@ -175,24 +182,7 @@ class DatamuseSearchProvider(Provider):
         except DatamuseError:
             pass
 
-        highest_score = max(suggestions, key=lambda s: s.score).score
-        lowest_score = min(suggestions, key=lambda s: s.score).score
-        return [
-            self._make_hit(
-                sug,
-                SearchSuggestionType.SUGGESTION,
-                matcher,
-                highest_score,
-                lowest_score,
-            )
-            for sug in suggestions
-        ]
-
-    async def _fetch(self, query: str, *fetchers: Callable) -> list[list[Hit]]:
-        results: list[list[Hit]] = await asyncio.gather(
-            *[fetcher(query) for fetcher in fetchers]
-        )
-        return results
+        return SearchResultType.SUGGESTION, suggestions
 
     async def search(self, query: str) -> Hits:
         parse_result = self._parse_query(query)

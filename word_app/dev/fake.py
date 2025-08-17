@@ -12,7 +12,7 @@ from word_app.data.grammar import (
     THESAURUS_GRAMMARS,
     Miscellaneous,
 )
-from word_app.data.search_providers.models import SearchSuggestionType
+from word_app.data.search_providers.models import SearchResultType
 from word_app.data.word_providers.base import AbstractWordProvider
 from word_app.ui.screens.quick_search._providers import Provider
 from word_app.ui.screens.quick_search._models import Hit, Hits
@@ -214,7 +214,7 @@ class FakerProvider(Provider):
                 match_display=f"[u]{word}[/]",
                 action=self._action(word),
                 text=word,
-                help=random.choice([t for t in SearchSuggestionType]).display,
+                help=random.choice([t for t in SearchResultType]).display,
             )
 
 

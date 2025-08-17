@@ -2,14 +2,8 @@ import re
 
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
-from enum import Enum, auto
 
-
-class SearchTermType(Enum):
-    SPELLED_LIKE = auto()
-    SUGGEST_SOUNDS_LIKE = auto()
-    SUGGEST_MEANS_LIKE = auto()
-    UNKNOWN = auto()
+from word_app.data.search_providers.models import SearchTermType
 
 
 @dataclass(frozen=True, eq=True)

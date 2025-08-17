@@ -20,12 +20,12 @@
 
 
 ## Quick Search Modal
-- [ ] Modal interface
+- [x] Modal interface
   - [x] CSS
   - [x] Design
   - [x] Initialize with runtime dependencies
   - [x] Real search providers
-  - [ ] Clean up code in DatamuseSearchProvider and DatamuseClient classes
+  - [x] Clean up code in DatamuseSearchProvider and DatamuseClient classes
   - [x] Add (?) hover for help tooltip.
   - [x] Result caching on search palette
 - [x] Faker Provider

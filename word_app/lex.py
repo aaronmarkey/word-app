@@ -1,103 +1,109 @@
+import gettext
+import pathlib
 from dataclasses import dataclass
+from typing import Final
+
+frozen = dataclass(frozen=True, eq=True)
 
 
-@dataclass
-class FormattableLexicon:
-    ATTRIBUTION: str
-    FREQUENCY_TOOLTIP: str
+def configure_language() -> gettext.GNUTranslations:
+    APPNAME: Final[str] = "word_app"
+    LOCALE_DIR: Final[str] = "locales"
+    ABS_DIR: Final[pathlib.Path] = pathlib.Path(__file__).parent.resolve()
+
+    fp = ABS_DIR / LOCALE_DIR
+
+    en_i18n = gettext.translation(
+        APPNAME, fp, fallback=False, languages=["en_US"]
+    )
+    return en_i18n
 
 
-@dataclass
+translations = configure_language()
+translations.install()
+_ = translations.gettext
+
+
+@frozen
 class Lexicon:
-    BACK: str
-    CLOSE: str
-    ETYMOLOGIES: str
-    FREQUENCY: str
-    SYLLABLES: str
-    WORD: str
+    """Container class for language strings.
 
-    DS_DATAMUSE_DESC: str
-    DS_DATAMUSE_NAME: str
-    DS_WORDNIK_DESC: str
-    DS_WORDNIK_NAME: str
+    Check /word-app/word_app/locales for PO, POT, and MO files.
+    """
 
-    INPUT_API_KEY_PLACEHOLDER: str
+    @frozen
+    class screen:
+        @frozen
+        class quick_search:
+            help: str = _("screen.quick_search.help")
+            tooltip: str = _("screen.quick_help.tooltip")
 
-    QUICK_SEARCH_HELP: str
-    QUICK_SEATCH_TOOLTIP: str
+        @frozen
+        class settings:
+            desc: str = _("screen.settings.desc")
+            ds_title: str = _("screen.settings.ds_title")
+            title: str = _("screen.settings.title")
 
-    SETTINGS_SCREEN_DESC: str
-    SETTINGS_SCREEN_SECTION_DS_TITLE: str
-    SETTINGS_SCREEN_TITLE: str
+        @frozen
+        class word_details:
+            @frozen
+            class sidebar:
+                defs_title: str = _("screen.word_details.sidebar.defs_title")
+                defs_desc: str = _("screen.word_details.sidebar.defs_desc")
+                exam_title: str = _("screen.word_details.sidebar.exam_title")
+                exam_desc: str = _("screen.word_details.sidebar.exam_desc")
+                info_title: str = _("screen.word_details.sidebar.info_title")
+                info_desc: str = _("screen.word_details.sidebar.info_desc")
+                phra_title: str = _("screen.word_details.sidebar.phra_title")
+                phra_desc: str = _("screen.word_details.sidebar.phra_desc")
+                rela_title: str = _("screen.word_details.sidebar.rela_title")
+                rela_desc: str = _("screen.word_details.sidebar.rela_desc")
+                thes_title: str = _("screen.word_details.sidebar.thes_title")
+                thes_desc: str = _("screen.word_details.sidebar.thes_desc")
 
-    SIDEBAR_DEFINITIONS_TITLE: str
-    SIDEBAR_DEFINITIONS_DESCRIPTION: str
-    SIDEBAR_EXAMPLES_TITLE: str
-    SIDEBAR_EXAMPLES_DESCRIPTION: str
-    SIDEBAR_INFO_TITLE: str
-    SIDEBAR_INFO_DESCRIPTION: str
-    SIDEBAR_PHRASES_TITLE: str
-    SIDEBAR_PHRASES_DESCRIPTION: str
-    SIDEBAR_RELATED_TITLE: str
-    SIDEBAR_RELATED_DESCRIPTION: str
-    SIDEBAR_THESAURUS_TITLE: str
-    SIDEBAR_THESAURUS_DESCRIPTION: str
+    @frozen
+    class service:
+        @frozen
+        class datamuse:
+            desc: str = _("service.datamuse.desc")
+            name: str = _("service.datamuse.name")
 
-    WD_CLOSE_ALL_SECTIONS: str
+        @frozen
+        class worknik:
+            desc: str = _("service.worknik.desc")
+            name: str = _("service.worknik.name")
+
+    @frozen
+    class ui:
+        @frozen
+        class btn:
+            back: str = _("ui.btn.back")
+            close: str = _("ui.btn.close")
+            close_all: str = _("ui.btn.close_all")
+
+        @frozen
+        class input:
+            @frozen
+            class placeholder:
+                api_key: str = _("ui.input.placeholder.api_key")
+
+        @frozen
+        class label:
+            etymologies: str = _("ui.label.etymologies")
+            frequency: str = _("ui.label.frequency")
+            syllables: str = _("ui.label.syllables")
+            word: str = _("ui.label.word")
 
 
-EN_LANG = Lexicon(
-    BACK="Back",
-    CLOSE="Close",
-    ETYMOLOGIES="Etymologies",
-    FREQUENCY="Frequency",
-    SYLLABLES="Syllables",
-    WORD="Word",
-    DS_DATAMUSE_DESC=(
-        "Datamuse provides meta-information about words. "
-        "For example: synonyms, related words."
-    ),
-    DS_DATAMUSE_NAME="Datamuse",
-    DS_WORDNIK_DESC=(
-        "Wordnik provides definitions, examples, synonyms, antonyms, and more."
-    ),
-    DS_WORDNIK_NAME="Wordnik",
-    INPUT_API_KEY_PLACEHOLDER="Enter API Key",
-    QUICK_SEARCH_HELP="""
-> ### Autocomplete
-> Enter terms to quickly find words via autocomplete. Miss-spellings are okay.
+@frozen
+class FormattableLexicon:
+    @frozen
+    class screen:
+        @frozen
+        class word_details:
+            attribution: str = _("screen.word_details.attribution")
+            frequency_tooltip: str = _("screen.word.frequency_tooltip")
 
-> ### Phrases
-> Words for phrases can be found to, for example: `ringing in the ears`
-would return `tinnitus`.
 
-> ### Spelling
-> Use `*` and `?` to find words by spelling.
-> - Example: `t**o` returns word beginning with `t`, ending in `o`, and two middle letters.
-> - Example `t?` returns all words beginning with `t`, regardless of length, `?t`, all words ending with `t`, `t?t`, beginning and ending with `t`, regardless of length.
-    """,
-    QUICK_SEATCH_TOOLTIP="[u]Click[/] or press [$user-action][^h][/] for help.",
-    SETTINGS_SCREEN_DESC="Configure the application.",
-    SETTINGS_SCREEN_SECTION_DS_TITLE="Data Sources",
-    SETTINGS_SCREEN_TITLE="Settings",
-    SIDEBAR_DEFINITIONS_TITLE="Definitions",
-    SIDEBAR_DEFINITIONS_DESCRIPTION="Definitions of the word.",
-    SIDEBAR_EXAMPLES_TITLE="Examples",
-    SIDEBAR_EXAMPLES_DESCRIPTION="Example sentences using the word.",
-    SIDEBAR_INFO_TITLE="Information",
-    SIDEBAR_INFO_DESCRIPTION="Syllable, etymology, and historical frequency information.",
-    SIDEBAR_PHRASES_TITLE="Phrases",
-    SIDEBAR_PHRASES_DESCRIPTION="Idiomatic phrases containing the word.",
-    SIDEBAR_RELATED_DESCRIPTION="Related words and word forms.",
-    SIDEBAR_RELATED_TITLE="Related",
-    SIDEBAR_THESAURUS_TITLE="Thesaurus",
-    SIDEBAR_THESAURUS_DESCRIPTION="Synonyms, antonyms, hyponyms, and hypernyms of the word.",
-    WD_CLOSE_ALL_SECTIONS="Collapse All",
-)
-EN_LANG_FORMATS = FormattableLexicon(
-    ATTRIBUTION="from {attr}.",
-    FREQUENCY_TOOLTIP=(
-        "Frequency of the word's usage in English texts "
-        "between the years {start} and {end}."
-    ),
-)
+LEX = Lexicon()
+LEX_FMT = FormattableLexicon()

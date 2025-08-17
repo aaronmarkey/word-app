@@ -13,7 +13,7 @@
         always same for section.
   - [ ] Sections are disabled, collapsed, and moved to the bottom of the
         screen if section is empty.
-
+  - [ ] WordDetail providers.
 ### Keybindings
 - [x] Section keybindings - Numbers, 1 through 9, by order of section,
       number always same for section.
@@ -36,10 +36,10 @@
   - [ ] Reorg code to better directory structure.
   - [ ] Ruff config: check import order.
   - [ ] Document things.
+  - [x] i18n
 - [x] Rethink session/cmd-line conf differences.
 - [x] Replace theme variables with "interace-color" and "hover-color"
 - [x] Defaults in UserConf class.
-- [ ] Dep injection
-  - [ ] Language
+- [x] Dep injection
   - [x] Word Detail Providers
   - [x] Suggestion Providers

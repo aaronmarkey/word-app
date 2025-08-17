@@ -5,7 +5,7 @@ from enum import IntEnum
 
 from pydantic import BaseModel
 
-from word_app.lex import EN_LANG
+from word_app.lex import LEX
 
 
 class DataSource(BaseModel):
@@ -21,15 +21,15 @@ class DataSource(BaseModel):
 
 DataMuseDataSource = DataSource(
     id="datamuse",
-    label_description=EN_LANG.DS_DATAMUSE_DESC,
-    label_name=EN_LANG.DS_DATAMUSE_NAME,
+    label_description=LEX.service.datamuse.desc,
+    label_name=LEX.service.datamuse.name,
     authentication=DataSource.Authentication.NONE,
 )
 
 WordnikDataSource = DataSource(
     id="wordnik",
-    label_description=EN_LANG.DS_WORDNIK_DESC,
-    label_name=EN_LANG.DS_WORDNIK_NAME,
+    label_description=LEX.service.worknik.desc,
+    label_name=LEX.service.worknik.name,
     authentication=DataSource.Authentication.BASIC,
 )
 

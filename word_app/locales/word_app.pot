@@ -1,0 +1,142 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2025-08-17 16:51-0600\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=CHARSET\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#: word_app/lex.py:53
+msgid "screen.quick_search.help"
+msgstr ""
+
+#: word_app/lex.py:54
+msgid "screen.quick_help.tooltip"
+msgstr ""
+
+#: word_app/lex.py:58
+msgid "screen.settings.desc"
+msgstr ""
+
+#: word_app/lex.py:59
+msgid "screen.settings.ds_title"
+msgstr ""
+
+#: word_app/lex.py:60
+msgid "screen.settings.title"
+msgstr ""
+
+#: word_app/lex.py:67
+msgid "screen.word_details.sidebar.defs_title"
+msgstr ""
+
+#: word_app/lex.py:68
+msgid "screen.word_details.sidebar.defs_desc"
+msgstr ""
+
+#: word_app/lex.py:69
+msgid "screen.word_details.sidebar.exam_title"
+msgstr ""
+
+#: word_app/lex.py:70
+msgid "screen.word_details.sidebar.exam_desc"
+msgstr ""
+
+#: word_app/lex.py:71
+msgid "screen.word_details.sidebar.info_title"
+msgstr ""
+
+#: word_app/lex.py:72
+msgid "screen.word_details.sidebar.info_desc"
+msgstr ""
+
+#: word_app/lex.py:73
+msgid "screen.word_details.sidebar.phra_title"
+msgstr ""
+
+#: word_app/lex.py:74
+msgid "screen.word_details.sidebar.phra_desc"
+msgstr ""
+
+#: word_app/lex.py:75
+msgid "screen.word_details.sidebar.rela_title"
+msgstr ""
+
+#: word_app/lex.py:76
+msgid "screen.word_details.sidebar.rela_desc"
+msgstr ""
+
+#: word_app/lex.py:77
+msgid "screen.word_details.sidebar.thes_title"
+msgstr ""
+
+#: word_app/lex.py:78
+msgid "screen.word_details.sidebar.thes_desc"
+msgstr ""
+
+#: word_app/lex.py:85
+msgid "service.datamuse.desc"
+msgstr ""
+
+#: word_app/lex.py:86
+msgid "service.datamuse.name"
+msgstr ""
+
+#: word_app/lex.py:90
+msgid "service.worknik.desc"
+msgstr ""
+
+#: word_app/lex.py:91
+msgid "service.worknik.name"
+msgstr ""
+
+#: word_app/lex.py:98
+msgid "ui.btn.back"
+msgstr ""
+
+#: word_app/lex.py:99
+msgid "ui.btn.close"
+msgstr ""
+
+#: word_app/lex.py:100
+msgid "ui.btn.close_all"
+msgstr ""
+
+#: word_app/lex.py:107
+msgid "ui.input.placeholder.api_key"
+msgstr ""
+
+#: word_app/lex.py:111
+msgid "ui.label.etymologies"
+msgstr ""
+
+#: word_app/lex.py:112
+msgid "ui.label.frequency"
+msgstr ""
+
+#: word_app/lex.py:113
+msgid "ui.label.syllables"
+msgstr ""
+
+#: word_app/lex.py:114
+msgid "ui.label.word"
+msgstr ""
+
+#: word_app/lex.py:125
+msgid "screen.word_details.attribution"
+msgstr ""
+
+#: word_app/lex.py:126
+msgid "screen.word.frequency_tooltip"
+msgstr ""

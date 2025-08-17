@@ -1,0 +1,153 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2025-08-17 16:20-0600\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: en_US\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#: word_app/lex.py:172
+msgid "screen.quick_search.help"
+msgstr ""
+"> ### Autocomplete\n"
+"> Enter terms to quickly find words via autocomplete. Miss-spellings are okay.\n"
+"\n"
+"> ### Phrases\n"
+"> Words for phrases can be found to, for example: `ringing in the ears` would return `tinnitus`.\n"
+"\n"
+"> ### Spelling\n"
+"> Use `*` and `?` to find words by spelling.\n"
+"> - Example: `t**o` returns word beginning with `t`, ending in `o`, and two middle letters.\n"
+"> - Example `t?` returns all words beginning with `t`, regardless of length, `?t`, all words ending with `t`, `t?t`, beginning and ending with `t`, regardless of length."
+
+#: word_app/lex.py:173
+msgid "screen.quick_help.tooltip"
+msgstr "[u]Click[/] or press [$user-action][^h][/] for help."
+
+#: word_app/lex.py:177
+msgid "screen.settings.desc"
+msgstr "Configure the application."
+
+#: word_app/lex.py:178
+msgid "screen.settings.ds_title"
+msgstr "Data Sources"
+
+#: word_app/lex.py:179
+msgid "screen.settings.title"
+msgstr "Settings"
+
+#: word_app/lex.py:186
+msgid "screen.word_details.sidebar.defs_title"
+msgstr "Definitions"
+
+#: word_app/lex.py:187
+msgid "screen.word_details.sidebar.defs_desc"
+msgstr "Definitions of the word."
+
+#: word_app/lex.py:188
+msgid "screen.word_details.sidebar.exam_title"
+msgstr "Examples"
+
+#: word_app/lex.py:189
+msgid "screen.word_details.sidebar.exam_desc"
+msgstr "Example sentences using the word."
+
+#: word_app/lex.py:190
+msgid "screen.word_details.sidebar.info_title"
+msgstr "Information"
+
+#: word_app/lex.py:191
+msgid "screen.word_details.sidebar.info_desc"
+msgstr "Syllable, etymology, and historical frequency information."
+
+#: word_app/lex.py:192
+msgid "screen.word_details.sidebar.phra_title"
+msgstr "Phrases"
+
+#: word_app/lex.py:193
+msgid "screen.word_details.sidebar.phra_desc"
+msgstr "Idiomatic phrases containing the word."
+
+#: word_app/lex.py:194
+msgid "screen.word_details.sidebar.rela_title"
+msgstr "Related"
+
+#: word_app/lex.py:195
+msgid "screen.word_details.sidebar.rela_desc"
+msgstr "Related words and word forms."
+
+#: word_app/lex.py:196
+msgid "screen.word_details.sidebar.thes_title"
+msgstr "Thesaurus"
+
+#: word_app/lex.py:197
+msgid "screen.word_details.sidebar.thes_desc"
+msgstr "Synonyms, antonyms, hyponyms, and hypernyms of the word."
+
+#: word_app/lex.py:204
+msgid "service.datamuse.desc"
+msgstr "Datamuse provides meta-information about words.\nFor example: synonyms, related words."
+
+#: word_app/lex.py:205
+msgid "service.datamuse.name"
+msgstr "Datamuse"
+
+#: word_app/lex.py:209
+msgid "service.worknik.desc"
+msgstr "Wordnik provides definitions, examples, synonyms, antonyms, and more."
+
+#: word_app/lex.py:210
+msgid "service.worknik.name"
+msgstr "Wordnik"
+
+#: word_app/lex.py:217
+msgid "ui.btn.back"
+msgstr "Back"
+
+#: word_app/lex.py:218
+msgid "ui.btn.close"
+msgstr "Close"
+
+#: word_app/lex.py:219
+msgid "ui.btn.close_all"
+msgstr "Close All"
+
+#: word_app/lex.py:226
+msgid "ui.input.placeholder.api_key"
+msgstr "Enter API Key"
+
+#: word_app/lex.py:230
+msgid "ui.label.etymologies"
+msgstr "Etymologies"
+
+#: word_app/lex.py:231
+msgid "ui.label.frequency"
+msgstr "Frequency"
+
+#: word_app/lex.py:232
+msgid "ui.label.syllables"
+msgstr "Syllables"
+
+#: word_app/lex.py:233
+msgid "ui.label.word"
+msgstr "Word"
+
+#: word_app/lex.py:125
+msgid "screen.word_details.attribution"
+msgstr "from {attr}."
+
+#: word_app/lex.py:126
+msgid "screen.word.frequency_tooltip"
+msgstr ""
+"Frequency of the word's usage in English texts between the years {start} and {end}."

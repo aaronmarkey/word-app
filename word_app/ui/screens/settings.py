@@ -6,7 +6,7 @@ from textual.widgets import Footer, Header, Input, Switch
 
 from word_app.data.sources import DataSource
 from word_app.ext import WAScreen
-from word_app.lex import EN_LANG
+from word_app.lex import LEX
 from word_app.ui.widgets import SwitchWithInput, SwitchWithLabel
 
 
@@ -27,12 +27,12 @@ class WidgetId:
 
 class SettingsScreen(WAScreen):
     WA_BINDING = "ctrl+s"
-    WA_DESCRIPTION = EN_LANG.SETTINGS_SCREEN_DESC
+    WA_DESCRIPTION = LEX.screen.settings.desc
     WA_ICON = "⚙️"
-    WA_TITLE = EN_LANG.SETTINGS_SCREEN_TITLE
+    WA_TITLE = LEX.screen.settings.title
 
     AUTO_FOCUS = ""
-    BINDINGS = [("escape", "app.pop_screen", EN_LANG.BACK)]
+    BINDINGS = [("escape", "app.pop_screen", LEX.ui.btn.back)]
     TITLE = WA_ICON + " " + WA_TITLE
 
     def _compose_data_sources_section(self) -> list[SwitchWithLabel]:
@@ -61,7 +61,7 @@ class SettingsScreen(WAScreen):
                             label_format=True,
                             label_length=longest_name,
                             label_tooltip=ds.label_description,
-                            input_placeholder=EN_LANG.INPUT_API_KEY_PLACEHOLDER,
+                            input_placeholder=LEX.ui.input.placeholder.api_key,
                             input_value=ds_conf.api_key,
                             switch_value=ds_conf.enabled,
                             switch_id=WidgetId.generate(ds.id, "enabled"),
@@ -82,7 +82,7 @@ class SettingsScreen(WAScreen):
         container = VerticalGroup(
             *self._compose_data_sources_section(), classes="container-bordered"
         )
-        container.border_title = EN_LANG.SETTINGS_SCREEN_SECTION_DS_TITLE
+        container.border_title = LEX.screen.settings.ds_title
         yield container
 
         yield Footer()

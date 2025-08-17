@@ -23,6 +23,17 @@ install-dev:
 	poetry install --with dev
 	cp -n ./word_app/usr/.env.example ./word_app/usr/.env || true
 
+# Create i18n .mo file
+lang-mo:
+	msgfmt -o ./word_app/locales/en_US/LC_MESSAGES/word_app.mo ./word_app/locales/en_US/LC_MESSAGES/word_app.po
+
+# Create i18n .pot files
+lang-pot:
+	poetry run xgettext -d base -o ./word_app/locales/word_app.pot ./word_app/lex.py
+
+lang-pot-po:
+	cp ./word_app/locales/word_app.pot ./word_app/locales/en_US/LC_MESSAGES/word_app.po
+
 # Run
 run:
 	poetry run textual run word_app/__main__.py

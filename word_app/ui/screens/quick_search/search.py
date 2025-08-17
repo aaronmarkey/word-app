@@ -48,7 +48,7 @@ from textual.worker import get_current_worker
 if TYPE_CHECKING:
     from textual.app import ComposeResult
 
-from word_app.lex import EN_LANG
+from word_app.lex import LEX
 from word_app.ui.constants import HELP_HCLICK_ICON
 from word_app.ui.screens.help import HelpScreen
 from word_app.ui.screens.quick_search._models import Hit, Hits
@@ -512,7 +512,7 @@ class SuggestionPalette(ModalScreen[ScreenResultType], inherit_css=False):
             The content of the screen.
         """
         help_label = Label(HELP_HCLICK_ICON, id="help-icon")
-        help_label.tooltip = EN_LANG.QUICK_SEATCH_TOOLTIP
+        help_label.tooltip = LEX.screen.quick_search.tooltip
         with Vertical(id="--container"):
             with Horizontal(id="--input"):
                 yield SuggestionIcon()
@@ -675,7 +675,9 @@ class SuggestionPalette(ModalScreen[ScreenResultType], inherit_css=False):
     def _action_show_help(self):
         self.app.push_screen(
             HelpScreen(
-                EN_LANG.QUICK_SEARCH_HELP, title="Help", button=EN_LANG.CLOSE
+                LEX.screen.quick_search.help,
+                title="Help",
+                button=LEX.ui.btn.close,
             )
         )
 

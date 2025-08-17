@@ -32,7 +32,7 @@ from word_app.data.grammar import (
 )
 from word_app.data.models import Word, WordDetailContainer
 from word_app.ext import WAScreen
-from word_app.lex import EN_LANG, EN_LANG_FORMATS
+from word_app.lex import LEX, LEX_FMT
 from word_app.ui.constants import HELP_HOVER_ICON
 from word_app.ui.widgets import Sidebar, SidebarButton, WALabel
 
@@ -76,43 +76,43 @@ class WordDetailSection(BaseModel):
 
 
 InformationSection = WordDetailSection(
-    title=EN_LANG.SIDEBAR_INFO_TITLE,
-    desc=EN_LANG.SIDEBAR_INFO_DESCRIPTION,
+    title=LEX.screen.word_details.sidebar.info_title,
+    desc=LEX.screen.word_details.sidebar.info_desc,
     key_binding="1",
     css_class="information",
 )
 
 DefinitionSection = WordDetailSection(
-    title=EN_LANG.SIDEBAR_DEFINITIONS_TITLE,
-    desc=EN_LANG.SIDEBAR_DEFINITIONS_DESCRIPTION,
+    title=LEX.screen.word_details.sidebar.defs_title,
+    desc=LEX.screen.word_details.sidebar.defs_desc,
     key_binding="2",
     css_class="definition",
 )
 
 ThesaurusSection = WordDetailSection(
-    title=EN_LANG.SIDEBAR_THESAURUS_TITLE,
-    desc=EN_LANG.SIDEBAR_THESAURUS_DESCRIPTION,
+    title=LEX.screen.word_details.sidebar.thes_title,
+    desc=LEX.screen.word_details.sidebar.thes_desc,
     key_binding="3",
     css_class="thesaurus",
 )
 
 RelatedSection = WordDetailSection(
-    title=EN_LANG.SIDEBAR_RELATED_TITLE,
-    desc=EN_LANG.SIDEBAR_RELATED_DESCRIPTION,
+    title=LEX.screen.word_details.sidebar.rela_title,
+    desc=LEX.screen.word_details.sidebar.rela_desc,
     key_binding="4",
     css_class="related",
 )
 
 ExampleSection = WordDetailSection(
-    title=EN_LANG.SIDEBAR_EXAMPLES_TITLE,
-    desc=EN_LANG.SIDEBAR_EXAMPLES_DESCRIPTION,
+    title=LEX.screen.word_details.sidebar.exam_title,
+    desc=LEX.screen.word_details.sidebar.exam_desc,
     key_binding="5",
     css_class="example",
 )
 
 PhraseSection = WordDetailSection(
-    title=EN_LANG.SIDEBAR_PHRASES_TITLE,
-    desc=EN_LANG.SIDEBAR_PHRASES_DESCRIPTION,
+    title=LEX.screen.word_details.sidebar.phra_title,
+    desc=LEX.screen.word_details.sidebar.phra_desc,
     key_binding="6",
     css_class="phrase",
 )
@@ -121,8 +121,8 @@ PhraseSection = WordDetailSection(
 class WordDetailScreen(WAScreen):
     AUTO_FOCUS = ""
     BINDINGS = [
-        ("escape", "app.pop_screen", EN_LANG.BACK),
-        ("-", "close_all_sections", EN_LANG.WD_CLOSE_ALL_SECTIONS),
+        ("escape", "app.pop_screen", LEX.ui.btn.back),
+        ("-", "close_all_sections", LEX.ui.btn.close_all),
     ]
 
     WA_BINDING = "w"
@@ -222,8 +222,10 @@ class WordDetailScreen(WAScreen):
             labels: list[Widget] = []
 
             if include_attribution:
-                attribution_text = EN_LANG_FORMATS.ATTRIBUTION.format(
-                    attr=container.source
+                attribution_text = (
+                    LEX_FMT.screen.word_details.attribution.format(
+                        attr=container.source
+                    )
                 )
                 labels.append(
                     WALabel(
@@ -319,14 +321,14 @@ class WordDetailScreen(WAScreen):
 
         elements.append(
             Label(
-                f"[i][b]{EN_LANG.WORD}[/][/]: {self._word.word}",
+                f"[i][b]{LEX.ui.label.word}[/][/]: {self._word.word}",
             )
         )
 
         if self._word.syllables.has_value:
             elements.append(
                 Label(
-                    f"[i][b]{EN_LANG.SYLLABLES}[/][/]: "
+                    f"[i][b]{LEX.ui.label.syllables}[/][/]: "
                     f"{self._word.syllables.as_string}",
                     classes="syllables",
                 )
@@ -338,7 +340,7 @@ class WordDetailScreen(WAScreen):
                 label_css += " mt-1"
             elements.append(
                 WALabel(
-                    EN_LANG.ETYMOLOGIES,
+                    LEX.ui.label.etymologies,
                     separator=": ",
                     classes=label_css,
                     styles="ib",
@@ -362,14 +364,16 @@ class WordDetailScreen(WAScreen):
             if self._word.etymologies.has_value:
                 label_css += " mt-1"
                 flabel = WALabel(
-                    f"{EN_LANG.FREQUENCY} {HELP_HOVER_ICON}",
+                    f"{LEX.ui.label.frequency} {HELP_HOVER_ICON}",
                     classes=label_css,
                     separator=": ",
                     styles="ib",
                 )
-                flabel.tooltip = EN_LANG_FORMATS.FREQUENCY_TOOLTIP.format(
-                    start=in_order[0].start,
-                    end=in_order[-1].end,
+                flabel.tooltip = (
+                    LEX_FMT.screen.word_details.frequency_tooltip.format(
+                        start=in_order[0].start,
+                        end=in_order[-1].end,
+                    )
                 )
                 elements.append(flabel)
                 elements.append(

@@ -158,28 +158,34 @@ class SuggestionPalette(ModalScreen[ScreenResultType], inherit_css=False):
         Binding(
             "ctrl+end, shift+end",
             "suggestion_list('last')",
-            "Go to bottom",
+            LEX.ui.btn.go_to_bottom,
             show=False,
         ),
         Binding(
             "ctrl+home, shift+home",
             "suggestion_list('first')",
-            "Go to top",
+            LEX.ui.btn.go_to_top,
             show=False,
         ),
-        Binding("down", "cursor_down", "Next suggestion", show=False),
-        Binding("escape", "escape", "Back"),
-        Binding("ctrl+h", "show_help", "Help"),
+        Binding("down", "cursor_down", LEX.ui.btn.next, show=False),
+        Binding("escape", "escape", LEX.ui.btn.back),
+        Binding("ctrl+h", "show_help", LEX.ui.btn.help),
         Binding(
-            "pagedown", "suggestion_list('page_down')", "Next page", show=False
+            "pagedown",
+            "suggestion_list('page_down')",
+            LEX.ui.btn.next_page,
+            show=False,
         ),
         Binding(
-            "pageup", "suggestion_list('page_up')", "Previous page", show=False
+            "pageup",
+            "suggestion_list('page_up')",
+            LEX.ui.btn.prev_page,
+            show=False,
         ),
         Binding(
             "up",
             "suggestion_list('cursor_up')",
-            "Previous suggestion",
+            LEX.ui.btn.prev,
             show=False,
         ),
     ]
@@ -467,7 +473,10 @@ class SuggestionPalette(ModalScreen[ScreenResultType], inherit_css=False):
                 suggestion_list.add_option(
                     Option(
                         Align.center(
-                            Text("No matches found", style="not bold")
+                            Text(
+                                LEX.screen.quick_search.no_matches,
+                                style="not bold",
+                            )
                         ),
                         disabled=True,
                         id=self._NO_MATCHES,
@@ -676,7 +685,7 @@ class SuggestionPalette(ModalScreen[ScreenResultType], inherit_css=False):
         self.app.push_screen(
             HelpScreen(
                 LEX.screen.quick_search.help,
-                title="Help",
+                title=LEX.ui.btn.help,
                 button=LEX.ui.btn.close,
             )
         )

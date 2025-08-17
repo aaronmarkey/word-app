@@ -151,3 +151,51 @@ msgstr "from {attr}."
 msgid "screen.word.frequency_tooltip"
 msgstr ""
 "Frequency of the word's usage in English texts between the years {start} and {end}."
+
+#: word_app/lex.py:45
+msgid "app.theme.light_name"
+msgstr "Light Theme"
+
+#: word_app/lex.py:46
+msgid "app.theme.dark_name"
+msgstr "Dark Theme"
+
+#: word_app/lex.py:97
+msgid "ui.btn.quick_find"
+msgstr "Quick Find"
+
+#: word_app/lex.py:98
+msgid "ui.btn.help"
+msgstr "Help"
+
+#: word_app/lex.py:100
+msgid "ui.btn.go_to_bottom"
+msgstr "Go to Bottom"
+
+#: word_app/lex.py:101
+msgid "ui.btn.go_to_top"
+msgstr "Go to Top"
+
+#: word_app/lex.py:102
+msgid "ui.btn.next"
+msgstr "Next"
+
+#: word_app/lex.py:103
+msgid "ui.btn.next_page"
+msgstr "Next Page"
+
+#: word_app/lex.py:104
+msgid "ui.btn.prev"
+msgstr "Previous"
+
+#: word_app/lex.py:105
+msgid "ui.btn.prev_page"
+msgstr "Previous Page"
+
+#: word_app/lex.py:54
+msgid "screen.quick_search.no_matches"
+msgstr "No matches found"
+
+#: word_app/lex.py:55
+msgid "screen.quick_search.placeholder"
+msgstr "Enter term..."

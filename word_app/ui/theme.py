@@ -1,8 +1,10 @@
 # Change variables in /word-app/word_app/app/main.css when doing updates.
 from textual.theme import Theme
 
+from word_app.lex import LEX
+
 DarkTheme = Theme(
-    name="Dark Theme",
+    name=LEX.app.theme.dark_name,
     primary="#D8D8D8",
     secondary="#E0E0E0",
     accent="#FFA62B",
@@ -17,7 +19,7 @@ DarkTheme = Theme(
 )
 
 LightTheme = Theme(
-    name="Light Theme",
+    name=LEX.app.theme.light_name,
     primary="#1E1E1E",
     secondary="#121212",
     accent="#FFA62B",

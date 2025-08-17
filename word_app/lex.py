@@ -1,4 +1,5 @@
 import gettext
+import locale
 import pathlib
 from dataclasses import dataclass
 from typing import Final
@@ -7,16 +8,21 @@ frozen = dataclass(frozen=True, eq=True)
 
 
 def configure_language() -> gettext.GNUTranslations:
+    SUPPORTED_LOCALES: Final[tuple[str, ...]] = ("en_US",)
     APPNAME: Final[str] = "word_app"
-    LOCALE_DIR: Final[str] = "locales"
     ABS_DIR: Final[pathlib.Path] = pathlib.Path(__file__).parent.resolve()
+    LOCALE_DIR: Final[str] = "locales"
 
     fp = ABS_DIR / LOCALE_DIR
+    lang, _ = locale.getlocale()
 
-    en_i18n = gettext.translation(
-        APPNAME, fp, fallback=False, languages=["en_US"]
+    if lang not in SUPPORTED_LOCALES:
+        raise SystemExit(f"Unsupported language: '{lang}'.")
+
+    translations = gettext.translation(
+        APPNAME, fp, fallback=False, languages=[lang]
     )
-    return en_i18n
+    return translations
 
 
 translations = configure_language()
@@ -32,11 +38,20 @@ class Lexicon:
     """
 
     @frozen
+    class app:
+        @frozen
+        class theme:
+            light_name: str = _("app.theme.light_name")
+            dark_name: str = _("app.theme.dark_name")
+
+    @frozen
     class screen:
         @frozen
         class quick_search:
             help: str = _("screen.quick_search.help")
             tooltip: str = _("screen.quick_help.tooltip")
+            no_matches: str = _("screen.quick_search.no_matches")
+            placeholder: str = _("screen.quick_search.placeholder")
 
         @frozen
         class settings:
@@ -80,6 +95,15 @@ class Lexicon:
             back: str = _("ui.btn.back")
             close: str = _("ui.btn.close")
             close_all: str = _("ui.btn.close_all")
+
+            help: str = _("ui.btn.help")
+            quick_find: str = _("ui.btn.quick_find")
+            go_to_bottom: str = _("ui.btn.go_to_bottom")
+            go_to_top: str = _("ui.btn.go_to_top")
+            next: str = _("ui.btn.next")
+            next_page: str = _("ui.btn.next_page")
+            prev: str = _("ui.btn.prev")
+            prev_page: str = _("ui.btn.prev_page")
 
         @frozen
         class input:

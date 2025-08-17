@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-08-17 16:51-0600\n"
+"POT-Creation-Date: 2025-08-17 17:44-0600\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,23 +17,39 @@ msgstr ""
 "Content-Type: text/plain; charset=CHARSET\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: word_app/lex.py:53
+#: word_app/lex.py:45
+msgid "app.theme.light_name"
+msgstr ""
+
+#: word_app/lex.py:46
+msgid "app.theme.dark_name"
+msgstr ""
+
+#: word_app/lex.py:52
 msgid "screen.quick_search.help"
 msgstr ""
 
-#: word_app/lex.py:54
+#: word_app/lex.py:53
 msgid "screen.quick_help.tooltip"
 msgstr ""
 
-#: word_app/lex.py:58
-msgid "screen.settings.desc"
+#: word_app/lex.py:54
+msgid "screen.quick_search.no_matches"
+msgstr ""
+
+#: word_app/lex.py:55
+msgid "screen.quick_search.placeholder"
 msgstr ""
 
 #: word_app/lex.py:59
-msgid "screen.settings.ds_title"
+msgid "screen.settings.desc"
 msgstr ""
 
 #: word_app/lex.py:60
+msgid "screen.settings.ds_title"
+msgstr ""
+
+#: word_app/lex.py:61
 msgid "screen.settings.title"
 msgstr ""
 
@@ -85,58 +101,90 @@ msgstr ""
 msgid "screen.word_details.sidebar.thes_desc"
 msgstr ""
 
-#: word_app/lex.py:85
+#: word_app/lex.py:84
 msgid "service.datamuse.desc"
 msgstr ""
 
-#: word_app/lex.py:86
+#: word_app/lex.py:85
 msgid "service.datamuse.name"
 msgstr ""
 
-#: word_app/lex.py:90
+#: word_app/lex.py:89
 msgid "service.worknik.desc"
 msgstr ""
 
-#: word_app/lex.py:91
+#: word_app/lex.py:90
 msgid "service.worknik.name"
 msgstr ""
 
-#: word_app/lex.py:98
+#: word_app/lex.py:96
 msgid "ui.btn.back"
 msgstr ""
 
-#: word_app/lex.py:99
+#: word_app/lex.py:97
 msgid "ui.btn.close"
 msgstr ""
 
-#: word_app/lex.py:100
+#: word_app/lex.py:98
 msgid "ui.btn.close_all"
 msgstr ""
 
+#: word_app/lex.py:100
+msgid "ui.btn.help"
+msgstr ""
+
+#: word_app/lex.py:101
+msgid "ui.btn.quick_find"
+msgstr ""
+
+#: word_app/lex.py:102
+msgid "ui.btn.go_to_bottom"
+msgstr ""
+
+#: word_app/lex.py:103
+msgid "ui.btn.go_to_top"
+msgstr ""
+
+#: word_app/lex.py:104
+msgid "ui.btn.next"
+msgstr ""
+
+#: word_app/lex.py:105
+msgid "ui.btn.next_page"
+msgstr ""
+
+#: word_app/lex.py:106
+msgid "ui.btn.prev"
+msgstr ""
+
 #: word_app/lex.py:107
-msgid "ui.input.placeholder.api_key"
-msgstr ""
-
-#: word_app/lex.py:111
-msgid "ui.label.etymologies"
-msgstr ""
-
-#: word_app/lex.py:112
-msgid "ui.label.frequency"
-msgstr ""
-
-#: word_app/lex.py:113
-msgid "ui.label.syllables"
+msgid "ui.btn.prev_page"
 msgstr ""
 
 #: word_app/lex.py:114
+msgid "ui.input.placeholder.api_key"
+msgstr ""
+
+#: word_app/lex.py:118
+msgid "ui.label.etymologies"
+msgstr ""
+
+#: word_app/lex.py:119
+msgid "ui.label.frequency"
+msgstr ""
+
+#: word_app/lex.py:120
+msgid "ui.label.syllables"
+msgstr ""
+
+#: word_app/lex.py:121
 msgid "ui.label.word"
 msgstr ""
 
-#: word_app/lex.py:125
+#: word_app/lex.py:130
 msgid "screen.word_details.attribution"
 msgstr ""
 
-#: word_app/lex.py:126
+#: word_app/lex.py:131
 msgid "screen.word.frequency_tooltip"
 msgstr ""

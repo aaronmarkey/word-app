@@ -4,6 +4,7 @@ from textual.app import App
 from textual.theme import BUILTIN_THEMES
 
 from word_app.app.conf import AppContext
+from word_app.lex import LEX
 from word_app.ui.screens.home import HomeScreen
 from word_app.ui.screens.quick_search.search import SuggestionPalette
 
@@ -11,7 +12,7 @@ from word_app.ui.screens.quick_search.search import SuggestionPalette
 class WordApp(App):
     ENABLE_COMMAND_PALETTE = False
     BINDINGS = [
-        ("f", "push_suggestion", "Find"),
+        ("f", "push_suggestion", LEX.ui.btn.quick_find),
     ]
 
     CSS_PATH = "main.css"
@@ -38,7 +39,10 @@ class WordApp(App):
     # Action Methods.
     def action_push_suggestion(self) -> None:
         self.app.push_screen(
-            SuggestionPalette(providers=[self.ctx.deps.search_provider_cls])
+            SuggestionPalette(
+                placeholder=LEX.screen.quick_search.placeholder,
+                providers=[self.ctx.deps.search_provider_cls],
+            )
         )
 
     # Event handlers.

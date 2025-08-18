@@ -90,6 +90,8 @@ class DatamuseSearchProvider(Provider):
     def _make_hits(
         self, query: str, objs: list[DatamuseModel], str: SearchResultType
     ) -> list[Hit]:
+        if not objs:
+            return []
         matcher = self.matcher(query)
         highest_score = max(objs, key=lambda o: o.score).score
         lowest_score = min(objs, key=lambda o: o.score).score

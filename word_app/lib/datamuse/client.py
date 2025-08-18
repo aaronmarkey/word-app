@@ -1,13 +1,15 @@
 from __future__ import annotations
 
-from copy import deepcopy
 from typing import AsyncGenerator
 
 import httpx
 
 from word_app.lib.datamuse.conf import (
-    DatamuseClientParams,
-    DatamuseClientParamsContainer,
+    DEFAULT_API_CONF,
+    DatamuseApiConf,
+    Endpoint,
+    Suggestions,
+    Words,
 )
 from word_app.lib.datamuse.exceptions import FailedToRefetchResult
 from word_app.lib.datamuse.models import Suggestion, Word
@@ -15,36 +17,27 @@ from word_app.lib.datamuse.transformer import DatamuseTransformer
 
 
 class DatamuseApiClient:
+    """API client for Datamuse.
+
+    https://www.datamuse.com/api/
+    """
+
     def __init__(
         self,
         *,
         client: httpx.AsyncClient | None = None,
-        params: DatamuseClientParamsContainer = DatamuseClientParams,
-        transformer_cls: type[DatamuseTransformer] = DatamuseTransformer,
+        conf: DatamuseApiConf | None = None,
     ) -> None:
-        params.validate()
-        self.params = params
+        self.conf = conf or DEFAULT_API_CONF
         self.client = client or httpx.AsyncClient()
-        self.transformer_cls = transformer_cls
+        self.transformer = DatamuseTransformer()
 
-    async def _request(
-        self, *, endpoint: str, params: dict = dict(), limit: int = 0
-    ) -> httpx.Response:
-        iparams = deepcopy(params)
+    async def _request(self, *, endpoint: Endpoint) -> httpx.Response:
+        """Helper to make the actual HTTP request."""
+        location = self.conf.full_path(endpoint)
 
-        if limit > 0:
-            self.params.limit.validate_limit(limit)
-        else:
-            limit = self.params.limit.default
-        location = self.params.location.full_path(endpoint)
-
-        iparams["max"] = limit
-
-        kwargs: dict[str, float | dict | None] = {
-            "timeout": self.params.timeout
-        }
-        if params:
-            kwargs["params"] = params
+        kwargs: dict[str, float | dict | None] = {"timeout": self.conf.timeout}
+        kwargs["params"] = endpoint.params
 
         try:
             resp = await self.client.get(
@@ -57,19 +50,26 @@ class DatamuseApiClient:
             raise FailedToRefetchResult() from exc
 
     async def clean(self) -> None:
+        """Clean up operations after done."""
         await self.client.aclose()
 
     async def get_suggestions(
         self, value: str, *, limit: int = 0
     ) -> AsyncGenerator[Suggestion]:
-        resp = await self._request(
-            endpoint="suggest",
-            params={"s": value},
-            limit=limit,
+        """Yield Suggestion objects. for the provided value."""
+        try:
+            max = Endpoint.Max(value=limit)
+        except ValueError:
+            max = Endpoint.Max()
+
+        endpoint = Suggestions(
+            param_s=Suggestions.Prefix(value=value),
+            param_max=max,
         )
+        resp = await self._request(endpoint=endpoint)
 
         for data in resp.json():
-            yield self.transformer_cls.suggestion(data)
+            yield self.transformer.suggestion(data)
 
     async def get_words(
         self,
@@ -79,17 +79,21 @@ class DatamuseApiClient:
         sounds_like: str = "",
         limit: int = 0,
     ) -> AsyncGenerator[Word]:
-        arg_map = {"ml": means_like, "sl": sounds_like, "sp": spelled_like}
-        params: dict[str, str | int] = {}
-        for name, value in arg_map.items():
-            if v := value.strip().lower():
-                params[name] = v
+        """Yield Word objects. for the provided 'likes'."""
+        try:
+            max = Endpoint.Max(value=limit)
+        except ValueError:
+            max = Endpoint.Max()
 
-        resp = await self._request(
-            endpoint="words",
-            params=params,
-            limit=limit,
-        )
+        params: Words.ParamsType = {
+            "param_ml": Words.MeansLike(value=means_like.strip().lower()),
+            "param_sl": Words.SoundsLike(value=sounds_like.strip().lower()),
+            "param_sp": Words.SpelledLike(value=spelled_like.strip().lower()),
+        }
+
+        endpoint = Words(param_max=max, **params)
+
+        resp = await self._request(endpoint=endpoint)
 
         for data in resp.json():
-            yield self.transformer_cls.word(data)
+            yield self.transformer.word(data)

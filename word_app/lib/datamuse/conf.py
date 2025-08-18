@@ -1,72 +1,142 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, field, fields
+from typing import TypedDict
 
 
 def _error(name: str, value: str) -> None:
+    """Helper to raise an error for some validation issue."""
     raise ValueError(
         f"Invalid value of '{value} for Datamuse configration '{name}'."
     )
 
 
+@dataclass
+class Param:
+    """Base class for query parameters used in endpoints."""
+
+    value: int | str | None = ""
+    """The value of the query parameter."""
+
+    name: str = ""
+    """The anme of the query parameter."""
+
+    @property
+    def as_dict(self) -> dict[str, int | str]:
+        return {self.name: self.value} if self.value else {}
+
+
+@dataclass
+class Endpoint:
+    """Datamuse Endpoint container.
+
+    Contains query params, endpoint configuration information.
+    """
+
+    @dataclass
+    class Max(Param):
+        """Both Datamuse endpoints support the 'max' parameter."""
+
+        name: str = field(default="max")
+        value: int | str | None = 100
+        _min: int = field(default=1)
+        _max: int = field(default=1000)
+
+        def __post_init__(self) -> None:
+            value = int(self.value) if self.value else -1
+            if not (self._min <= value and value <= self._max):
+                _error(self.name, str(self.value))
+
+    _endpoint: str = field(default="")
+    param_max: Max = field(default_factory=Max)
+
+    @property
+    def endpoint(self) -> str:
+        """Public access to endpoint."""
+        return self._endpoint
+
+    @property
+    def params(self) -> dict:
+        """Convert all Param type fields into a JSON-compat dictionary."""
+        params: dict = {}
+        for _field in fields(self):
+            if issubclass(_field.type, Param):  # type: ignore
+                param = getattr(self, _field.name)
+                if value := param.value:
+                    params[param.name] = value
+        return params
+
+
+@dataclass
+class Suggestions(Endpoint):
+    """Suggestion endpoint."""
+
+    @dataclass
+    class Prefix(Param):
+        """The string partial to get suggestions for."""
+
+        name: str = field(default="s")
+        value: str | int | None = field(default="")
+
+    _endpoint: str = "sug"
+    param_s: Prefix = field(default_factory=Prefix)
+
+
+@dataclass
+class Words(Endpoint):
+    """Words endpoint."""
+
+    @dataclass
+    class MeansLike(Param):
+        """Require results have a meaning related to this string value"""
+
+        name: str = field(default="ml")
+        value: str | int | None = field(default="")
+
+    @dataclass
+    class SoundsLike(Param):
+        """Require results are pronounced similarly to the string of chars."""
+
+        name: str = field(default="sl")
+        value: str | int | None = field(default="")
+
+    @dataclass
+    class SpelledLike(Param):
+        """Require results are spelled similarly to the string of chars."""
+
+        name: str = field(default="sp")
+        value: str | int | None = field(default="")
+
+    class ParamsType(TypedDict):
+        """Typing for endpoint params. For ease-of-use."""
+
+        param_ml: "Words.MeansLike"
+        param_sl: "Words.SoundsLike"
+        param_sp: "Words.SpelledLike"
+
+    _endpoint: str = "words"
+    param_ml: MeansLike = field(default_factory=MeansLike)
+    param_sl: SoundsLike = field(default_factory=SoundsLike)
+    param_sp: SpelledLike = field(default_factory=SpelledLike)
+
+
 @dataclass(frozen=True, eq=True)
-class LimitContainer:
-    default: int
-    max: int
-    min: int
+class DatamuseApiConf:
+    """Datamuse API configuration."""
 
-    def _validate(self, name: str, value: int) -> None:
-        if not (self.min <= value and value <= self.max):
-            _error(name, str(value))
-
-    def validate(self) -> None:
-        self._validate("default", self.default)
-
-    def validate_limit(self, limit: int) -> None:
-        self._validate("limit", limit)
-
-
-@dataclass(frozen=True, eq=True)
-class LocationContainer:
     root: str
-    endpoint_suggest: str
-    endpoint_words: str
-
-    def validate(self) -> None:
-        for name, value in [
-            ("root", self.root),
-            ("endpoint_suggest", self.endpoint_suggest),
-            ("endpoint_words", self.endpoint_words),
-        ]:
-            if not value.strip():
-                _error(name, value)
-
-    def full_path(self, endpoint: str) -> str:
-        endpoint = getattr(self, f"endpoint_{endpoint}")
-        return f"{self.root}/{endpoint}"
-
-
-@dataclass(frozen=True, eq=True)
-class DatamuseClientParamsContainer:
-    limit: LimitContainer
-    location: LocationContainer
+    """The base URL of the Datamuse API."""
     timeout: float | None
+    """Default timeout to use on requests to API, in seconds."""
 
-    def _validate_timeout(self) -> None:
+    def __post_init__(self) -> None:
         if to := self.timeout:
             if to < 0.0:
                 _error("timeout", str(to))
 
-    def validate(self) -> None:
-        self.limit.validate()
-        self.location.validate()
-        self._validate_timeout()
+    def full_path(self, endpoint: Endpoint) -> str:
+        return f"{self.root}/{endpoint.endpoint}"
 
 
-DatamuseClientParams = DatamuseClientParamsContainer(
-    limit=LimitContainer(max=1000, min=1, default=100),
-    location=LocationContainer(
-        root="https://api.datamuse.com",
-        endpoint_suggest="sug",
-        endpoint_words="words",
-    ),
+DEFAULT_API_CONF = DatamuseApiConf(
+    root="https://api.datamuse.com",
     timeout=1.0,
 )

@@ -1,31 +1,11 @@
-from dataclasses import dataclass, field, fields
+from dataclasses import dataclass, field
 from typing import TypedDict
 
-
-def _error(name: str, value: str) -> None:
-    """Helper to raise an error for some validation issue."""
-    raise ValueError(
-        f"Invalid value of '{value} for Datamuse configration '{name}'."
-    )
+from word_app.lib.utils import Endpoint, Param, _error
 
 
 @dataclass
-class Param:
-    """Base class for query parameters used in endpoints."""
-
-    value: int | str | None = ""
-    """The value of the query parameter."""
-
-    name: str = ""
-    """The anme of the query parameter."""
-
-    @property
-    def as_dict(self) -> dict[str, int | str]:
-        return {self.name: self.value} if self.value else {}
-
-
-@dataclass
-class Endpoint:
+class DatamuseEndpoint(Endpoint):
     """Datamuse Endpoint container.
 
     Contains query params, endpoint configuration information.
@@ -45,28 +25,11 @@ class Endpoint:
             if not (self._min <= value and value <= self._max):
                 _error(self.name, str(self.value))
 
-    _endpoint: str = field(default="")
     param_max: Max = field(default_factory=Max)
-
-    @property
-    def endpoint(self) -> str:
-        """Public access to endpoint."""
-        return self._endpoint
-
-    @property
-    def params(self) -> dict:
-        """Convert all Param type fields into a JSON-compat dictionary."""
-        params: dict = {}
-        for _field in fields(self):
-            if issubclass(_field.type, Param):  # type: ignore
-                param = getattr(self, _field.name)
-                if value := param.value:
-                    params[param.name] = value
-        return params
 
 
 @dataclass
-class Suggestions(Endpoint):
+class Suggestions(DatamuseEndpoint):
     """Suggestion endpoint."""
 
     @dataclass
@@ -81,7 +44,7 @@ class Suggestions(Endpoint):
 
 
 @dataclass
-class Words(Endpoint):
+class Words(DatamuseEndpoint):
     """Words endpoint."""
 
     @dataclass
@@ -132,7 +95,7 @@ class DatamuseApiConf:
             if to < 0.0:
                 _error("timeout", str(to))
 
-    def full_path(self, endpoint: Endpoint) -> str:
+    def full_path(self, endpoint: DatamuseEndpoint) -> str:
         return f"{self.root}/{endpoint.endpoint}"
 
 

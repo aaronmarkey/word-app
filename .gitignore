@@ -9,3 +9,6 @@ __pycache__/
 
 # Senstive
 .env
+
+# Personal (Yes. I know about the exclude file.)
+word_app/dev/playground.py

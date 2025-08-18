@@ -7,7 +7,7 @@ import httpx
 from word_app.lib.datamuse.conf import (
     DEFAULT_API_CONF,
     DatamuseApiConf,
-    Endpoint,
+    DatamuseEndpoint,
     Suggestions,
     Words,
 )
@@ -32,7 +32,7 @@ class DatamuseApiClient:
         self.client = client or httpx.AsyncClient()
         self.transformer = DatamuseTransformer()
 
-    async def _request(self, *, endpoint: Endpoint) -> httpx.Response:
+    async def _request(self, *, endpoint: DatamuseEndpoint) -> httpx.Response:
         """Helper to make the actual HTTP request."""
         location = self.conf.full_path(endpoint)
 
@@ -58,9 +58,9 @@ class DatamuseApiClient:
     ) -> AsyncGenerator[Suggestion]:
         """Yield Suggestion objects. for the provided value."""
         try:
-            max = Endpoint.Max(value=limit)
+            max = DatamuseEndpoint.Max(value=limit)
         except ValueError:
-            max = Endpoint.Max()
+            max = DatamuseEndpoint.Max()
 
         endpoint = Suggestions(
             param_s=Suggestions.Prefix(value=value),
@@ -81,9 +81,9 @@ class DatamuseApiClient:
     ) -> AsyncGenerator[Word]:
         """Yield Word objects. for the provided 'likes'."""
         try:
-            max = Endpoint.Max(value=limit)
+            max = DatamuseEndpoint.Max(value=limit)
         except ValueError:
-            max = Endpoint.Max()
+            max = DatamuseEndpoint.Max()
 
         params: Words.ParamsType = {
             "param_ml": Words.MeansLike(value=means_like.strip().lower()),

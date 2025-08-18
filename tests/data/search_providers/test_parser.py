@@ -1,7 +1,6 @@
 import pytest
 
-from word_app.data.search_providers import models
-from word_app.data.search_providers import parser
+from word_app.data.search_providers import models, parser
 
 
 @pytest.mark.parametrize(

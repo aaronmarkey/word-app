@@ -11,6 +11,7 @@ clean:
 
 # Run code auto-formatter.
 format:
+	poetry run ruff check . --fix
 	poetry run ruff format .
 
 # Install project

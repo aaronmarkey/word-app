@@ -6,8 +6,8 @@ from typing import AsyncGenerator
 import httpx
 
 from word_app.lib.datamuse.conf import (
-    DatamuseClientParamsContainer,
     DatamuseClientParams,
+    DatamuseClientParamsContainer,
 )
 from word_app.lib.datamuse.exceptions import FailedToRefetchResult
 from word_app.lib.datamuse.models import Suggestion, Word

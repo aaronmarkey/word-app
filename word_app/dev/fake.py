@@ -14,8 +14,8 @@ from word_app.data.grammar import (
 )
 from word_app.data.search_providers.models import SearchResultType
 from word_app.data.word_providers.base import AbstractWordProvider
-from word_app.ui.screens.quick_search._providers import Provider
 from word_app.ui.screens.quick_search._models import Hit, Hits
+from word_app.ui.screens.quick_search._providers import Provider
 from word_app.ui.screens.word_detail import WordDetailScreen
 
 dictionary_grammar = DynamicProvider(

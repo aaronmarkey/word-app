@@ -4,7 +4,7 @@ from word_app.app.factory import create_app
 from word_app.app.main import WordApp
 from word_app.data.search_providers.datamuse import DatamuseSearchProvider
 from word_app.data.sources import get_available_data_sources
-from word_app.dev.fake import FakeWordProvider, FakerProvider  # type: ignore
+from word_app.dev.fake import FakerProvider, FakeWordProvider  # type: ignore
 from word_app.io import ApplicationPath
 from word_app.ui.theme import DarkTheme, LightTheme
 

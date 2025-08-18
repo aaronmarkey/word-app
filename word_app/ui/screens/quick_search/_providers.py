@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
+from asyncio import Task, create_task
 from typing import TYPE_CHECKING, Any, Callable, Iterable
 
-from asyncio import Task, create_task
 from textual.fuzzy import Matcher
 from textual.screen import Screen
 from textual.style import Style

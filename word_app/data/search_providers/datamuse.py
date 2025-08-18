@@ -12,8 +12,8 @@ from word_app.data.search_providers.parser import (
     ParseResult,
     RegexSearchTermParser,
 )
-from word_app.lib.datamuse.exceptions import DatamuseError
 from word_app.lib.datamuse.client import DatamuseApiClient
+from word_app.lib.datamuse.exceptions import DatamuseError
 from word_app.lib.datamuse.models import DatamuseModel, Suggestion, Word
 from word_app.ui.screens.quick_search._models import Hit, Hits
 from word_app.ui.screens.quick_search._providers import Provider

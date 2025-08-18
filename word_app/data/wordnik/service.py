@@ -1,10 +1,10 @@
+from wordnik import WordApi, swagger
+
 from word_app.data.models import Definitions, Thesaurus
 from word_app.data.services.base import BaseDataService
 from word_app.data.wordnik.sources import AmericanHeritage
 from word_app.data.wordnik.transformer import WordnikTransformer
 from word_app.exceptions import WordAppException
-
-from wordnik import WordApi, swagger
 
 WORKNIK_API_URL = "http://api.wordnik.com/v4"
 

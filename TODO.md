@@ -34,7 +34,7 @@
 ## Misc
 - [ ] General project clean up.
   - [ ] Reorg code to better directory structure.
-  - [ ] Ruff config: check import order.
+  - [x] Ruff config: check import order.
   - [ ] Document things.
   - [x] i18n
 - [x] Rethink session/cmd-line conf differences.

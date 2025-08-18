@@ -3,9 +3,9 @@ from __future__ import annotations
 from functools import total_ordering
 
 from textual.reactive import var
+from textual.visual import VisualType
 from textual.widgets import Input, OptionList, Static
 from textual.widgets.option_list import Option
-from textual.visual import VisualType
 
 from word_app.ui.screens.quick_search._models import Hit
 

@@ -1,6 +1,7 @@
 from statistics import mean
 
 import pyperclip
+from pydantic import BaseModel
 from textual.app import ComposeResult
 from textual.containers import HorizontalGroup, ItemGrid, VerticalScroll
 from textual.events import Key, MouseDown, MouseEvent, MouseUp
@@ -14,8 +15,6 @@ from textual.widgets import (
     Rule,
     Sparkline,
 )
-
-from pydantic import BaseModel
 
 from word_app.data.grammar import (
     Antonym,

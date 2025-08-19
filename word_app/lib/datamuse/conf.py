@@ -1,7 +1,7 @@
 from dataclasses import dataclass, field
 from typing import TypedDict
 
-from word_app.lib.utils import Endpoint, Param, _error
+from word_app.lib.utils import Endpoint, Param, make_value_error
 
 
 @dataclass
@@ -23,7 +23,7 @@ class DatamuseEndpoint(Endpoint):
         def __post_init__(self) -> None:
             value = int(self.value) if self.value else -1
             if not (self._min <= value and value <= self._max):
-                _error(self.name, str(self.value))
+                make_value_error(self.name, str(self.value))
 
     param_max: Max = field(default_factory=Max)
 
@@ -93,7 +93,7 @@ class DatamuseApiConf:
     def __post_init__(self) -> None:
         if to := self.timeout:
             if to < 0.0:
-                _error("timeout", str(to))
+                make_value_error("timeout", str(to))
 
     def full_path(self, endpoint: DatamuseEndpoint) -> str:
         return f"{self.root}/{endpoint.endpoint}"

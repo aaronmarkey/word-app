@@ -199,3 +199,7 @@ msgstr "No matches found"
 #: word_app/lex.py:55
 msgid "screen.quick_search.placeholder"
 msgstr "Enter term..."
+
+#: word_app/lex.py:116
+msgid "ui.label.attribution"
+msgstr "Attributions"

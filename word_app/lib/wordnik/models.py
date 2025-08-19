@@ -1,6 +1,16 @@
 from dataclasses import dataclass
 from enum import StrEnum
 
+from wordnik.models import (  # noqa
+    Citation,
+    Definition,
+    ExampleUsage,
+    Label,
+    Note,
+    Related,
+    TextPron,
+)
+
 
 @dataclass(frozen=True, eq=True)
 class SourceDictionary:
@@ -49,3 +59,23 @@ class PartOfSpeech(StrEnum):
     SUFFIX = "suffix"
     VERB_INTRANSITIVE = "verb-intransitive"
     VERB_TRANSITIVE = "verb-transitive"
+
+
+class RelationshipType(StrEnum):
+    SYNONYM = "synonym"
+    ANTONYM = "antonym"
+    VARIANT = "variant"
+    EQUIVALENT = "equivalent"
+    CROSS_REFERENCE = "cross-reference"
+    RELATED_WORD = "related-word"
+    RHYME = "rhyme"
+    FORM = "form"
+    ETYMOLOGLYCALY_RELATED_TERM = "etymologically-related-term"
+    HYPERNYM = "hypernym"
+    HYPERSONYM = "hyponym"
+    INFLECTED_FORM = "inflected-form"
+    PRIMARY = "primary"
+    SAME_CONTEXT = "same-context"
+    VERB_FORM = "verb-form"
+    VERB_STEM = "verb-stem"
+    HAS_TOPIC = "has-topic"

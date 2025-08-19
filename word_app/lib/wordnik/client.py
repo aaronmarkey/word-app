@@ -2,9 +2,17 @@ from copy import deepcopy
 from typing import Any
 
 import httpx
+from typing_extensions import AsyncGenerator
 
-from word_app.lib.wordnik.conf import WordnikApiConf, WordnikEndpoint
+from word_app.lib.wordnik.conf import (
+    Definitions,
+    RelatedWords,
+    WordnikApiConf,
+    WordnikEndpoint,
+)
 from word_app.lib.wordnik.exceptions import FailedToRefetchResult
+from word_app.lib.wordnik.models import Definition, Related
+from word_app.lib.wordnik.transformer import WordnikTransformer
 
 
 class WordnikApiClient:
@@ -13,6 +21,7 @@ class WordnikApiClient:
     ) -> None:
         self.conf = conf
         self.client = client or httpx.AsyncClient()
+        self.transformer = WordnikTransformer()
         self._cookie: str | None = None
 
     def _headers(self) -> dict[str, str]:
@@ -42,6 +51,20 @@ class WordnikApiClient:
             return resp
         except (httpx.RequestError, httpx.HTTPError) as exc:
             raise FailedToRefetchResult() from exc
+
+    async def get_definitions(
+        self, *, word: str, endpoint: Definitions
+    ) -> AsyncGenerator[Definition]:
+        resp = await self._request(word, endpoint)
+        for definition in self.transformer.defintions(resp.json()):
+            yield definition
+
+    async def get_related_words(
+        self, *, word: str, endpoint: RelatedWords
+    ) -> AsyncGenerator[Related]:
+        resp = await self._request(word, endpoint)
+        for related in self.transformer.related(resp.json()):
+            yield related
 
     async def clean(self) -> None:
         """Clean up operations after done."""

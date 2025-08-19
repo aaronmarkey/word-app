@@ -55,6 +55,10 @@ class WordDetailContainer(BaseModel, Generic[WordDetailType]):
         return []
 
     @property
+    def details(self) -> list[WordDetailType]:
+        return self._details
+
+    @property
     def has_value(self) -> bool:
         return bool(self._details)
 

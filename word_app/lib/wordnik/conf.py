@@ -1,8 +1,14 @@
 from dataclasses import dataclass, field
+from typing import TypeAlias
 
-from word_app.lib.utils import Endpoint, Param, _error
+from word_app.lib.utils import Endpoint, EnumParam, Param, make_value_error
 from word_app.lib.wordnik.models import AmericanHeritage, SourceDictionary
-from word_app.lib.wordnik.models import PartOfSpeech as POSEnum
+from word_app.lib.wordnik.models import (
+    PartOfSpeech as POSEnum,
+)
+from word_app.lib.wordnik.models import (
+    RelationshipType as RTEnum,
+)
 
 
 @dataclass
@@ -31,7 +37,19 @@ class WordnikEndpoint(Endpoint):
 
 
 @dataclass
-class WordDefintions(WordnikEndpoint):
+class _UseCanonical(Param):
+    name: str = field(default="useCanonical")
+    value: bool = field(default=False)
+
+
+@dataclass
+class _Word(Param):
+    name: str = field(default="word")
+    value: str = field(default="")
+
+
+@dataclass
+class Definitions(WordnikEndpoint):
     @dataclass
     class IncludeRelated(Param):
         name: str = field(default="includeRelated")
@@ -53,13 +71,9 @@ class WordDefintions(WordnikEndpoint):
         value: int = field(default=500)
 
     @dataclass
-    class PartOfSpeech(Param):
+    class PartOfSpeech(EnumParam):
         name: str = field(default="partOfSpeech")
         value: list[POSEnum] = field(default_factory=list)
-
-        @property
-        def as_dict(self) -> dict:
-            return {self.name: ",".join([v.value for v in self.value])}
 
     @dataclass
     class SourceDictionaries(Param):
@@ -74,26 +88,45 @@ class WordDefintions(WordnikEndpoint):
                 {self.name: [str(d) for d in self.value]} if self.value else {}
             )
 
-    @dataclass
-    class UseCanonical(Param):
-        name: str = field(default="useCanonical")
-        value: bool = field(default=False)
-
-    @dataclass
-    class Word(Param):
-        name: str = field(default="word")
-        value: str = field(default="")
+    UseCanonical: TypeAlias = _UseCanonical  # type: ignore
+    Word: TypeAlias = _Word  # type: ignore
 
     _endpoint_purpose: str = "definitions"
-    word: Word = field(default_factory=Word)
+    include_related: IncludeRelated = field(default_factory=IncludeRelated)
+    include_tags: IncludeTags = field(default_factory=IncludeTags)
     limit: Limit = field(default_factory=Limit)
     part_of_speech: PartOfSpeech = field(default_factory=PartOfSpeech)
-    include_related: IncludeRelated = field(default_factory=IncludeRelated)
     source_dictionaries: SourceDictionaries = field(
         default_factory=SourceDictionaries
     )
     use_canonical: UseCanonical = field(default_factory=UseCanonical)
-    include_tags: IncludeTags = field(default_factory=IncludeTags)
+    word: Word = field(default_factory=Word)
+
+
+@dataclass
+class RelatedWords(WordnikEndpoint):
+    @dataclass
+    class LimitPerRelationshipType(Param):
+        name: str = field(default="limitPerRelationshipType")
+        value: int = field(default=1_000)
+
+    @dataclass
+    class RelationshipTypes(EnumParam):
+        name: str = field(default="relationshipTypes")
+        value: list[RTEnum] = field(default_factory=list)
+
+    UseCanonical: TypeAlias = _UseCanonical  # type: ignore
+    Word: TypeAlias = _Word  # type: ignore
+
+    _endpoint: str = "relatedWords"
+    limit_per_relationship_type: LimitPerRelationshipType = field(
+        default_factory=LimitPerRelationshipType
+    )
+    relationship_types: RelationshipTypes = field(
+        default_factory=RelationshipTypes
+    )
+    use_canonical: UseCanonical = field(default_factory=UseCanonical)
+    word: Word = field(default_factory=Word)
 
 
 @dataclass
@@ -105,7 +138,7 @@ class WordnikApiConf:
     def __post_init__(self) -> None:
         if to := self.timeout:
             if to < 0.0:
-                _error("timeout", str(to))
+                make_value_error("timeout", str(to))
 
     def full_path(self, word: str, endpoint: WordnikEndpoint) -> str:
         return f"{self.root}/{endpoint.endpoint_fmt(word)}"

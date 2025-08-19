@@ -2,7 +2,7 @@ from dataclasses import dataclass, field, fields
 from typing import Any
 
 
-def _error(name: str, value: str) -> None:
+def make_value_error(name: str, value: str) -> None:
     """Helper to raise an error for some validation issue."""
     raise ValueError(
         f"Invalid value of '{value} for Datamuse configration '{name}'."
@@ -25,6 +25,15 @@ class Param:
 
 
 @dataclass
+class EnumParam(Param):
+    """Class for enumeration query parameters."""
+
+    @property
+    def as_dict(self) -> dict:
+        return {self.name: ",".join([v.value for v in self.value])}
+
+
+@dataclass
 class Endpoint:
     """Endpoint container.
 
@@ -43,8 +52,8 @@ class Endpoint:
         """Convert all Param type fields into a JSON-compat dictionary."""
         params: dict = {}
         for _field in fields(self):
-            if issubclass(_field.type, Param):  # type: ignore
-                param: Param = getattr(self, _field.name)
-                if _ := param.value:
-                    params |= param.as_dict
+            value = getattr(self, _field.name)
+            if issubclass(value.__class__, Param):  # type: ignore
+                if _ := value.value:
+                    params |= value.as_dict
         return params

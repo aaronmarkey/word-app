@@ -45,7 +45,11 @@ class DatamuseSearchProvider(Provider):
 
     def _action(self, word: str):
         async def __action():
-            details = self.app.ctx.deps.word_provider.get_word_details(word)
+            details = (
+                await self.app.ctx.deps.detail_provider.get_details_for_word(
+                    word
+                )
+            )
             self.app.push_screen(WordDetailScreen(word=details))
 
         return __action

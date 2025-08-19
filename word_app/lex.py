@@ -113,6 +113,7 @@ class Lexicon:
 
         @frozen
         class label:
+            attribution: str = _("ui.label.attribution")
             etymologies: str = _("ui.label.etymologies")
             frequency: str = _("ui.label.frequency")
             syllables: str = _("ui.label.syllables")

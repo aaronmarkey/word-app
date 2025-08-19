@@ -33,6 +33,7 @@ from word_app.data.models import Word, WordDetailContainer
 from word_app.ext import WAScreen
 from word_app.lex import LEX, LEX_FMT
 from word_app.ui.constants import HELP_HOVER_ICON
+from word_app.ui.utils import hoverable
 from word_app.ui.widgets import Sidebar, SidebarButton, WALabel
 
 
@@ -72,6 +73,7 @@ class WordDetailSection(BaseModel):
     desc: str
     key_binding: str
     css_class: str
+    id: str
 
 
 InformationSection = WordDetailSection(
@@ -79,6 +81,7 @@ InformationSection = WordDetailSection(
     desc=LEX.screen.word_details.sidebar.info_desc,
     key_binding="1",
     css_class="information",
+    id="section-information",
 )
 
 DefinitionSection = WordDetailSection(
@@ -86,6 +89,7 @@ DefinitionSection = WordDetailSection(
     desc=LEX.screen.word_details.sidebar.defs_desc,
     key_binding="2",
     css_class="definition",
+    id="section-definition",
 )
 
 ThesaurusSection = WordDetailSection(
@@ -93,6 +97,7 @@ ThesaurusSection = WordDetailSection(
     desc=LEX.screen.word_details.sidebar.thes_desc,
     key_binding="3",
     css_class="thesaurus",
+    id="section-thesaurus",
 )
 
 RelatedSection = WordDetailSection(
@@ -100,6 +105,7 @@ RelatedSection = WordDetailSection(
     desc=LEX.screen.word_details.sidebar.rela_desc,
     key_binding="4",
     css_class="related",
+    id="section-related",
 )
 
 ExampleSection = WordDetailSection(
@@ -107,6 +113,7 @@ ExampleSection = WordDetailSection(
     desc=LEX.screen.word_details.sidebar.exam_desc,
     key_binding="5",
     css_class="example",
+    id="section-example",
 )
 
 PhraseSection = WordDetailSection(
@@ -114,7 +121,13 @@ PhraseSection = WordDetailSection(
     desc=LEX.screen.word_details.sidebar.phra_desc,
     key_binding="6",
     css_class="phrase",
+    id="section-phrase",
 )
+
+
+def _make_attribution(*attributions: str) -> str:
+    no_repeats = set(attributions)
+    return ", ".join(no_repeats)
 
 
 class WordDetailScreen(WAScreen):
@@ -155,6 +168,7 @@ class WordDetailScreen(WAScreen):
         container: WordDetailContainer,
         section: WordDetailSection,
         allowed_types: list[Grammar],
+        id: str = "",
     ) -> Collapsible | None:
         # Allowed Types and order they are displayed.
         if container.has_value:
@@ -205,6 +219,7 @@ class WordDetailScreen(WAScreen):
                 title=section.title,
                 collapsed=False,
                 classes="word-detail--container",
+                id=id,
             )
             self._active_sections[section.key_binding] = con
             return con
@@ -216,23 +231,22 @@ class WordDetailScreen(WAScreen):
         container: WordDetailContainer,
         section: WordDetailSection,
         include_attribution: bool = True,
+        id: str = "",
     ) -> Collapsible | None:
         if container.has_value:
             labels: list[Widget] = []
 
             if include_attribution:
-                attribution_text = (
-                    LEX_FMT.screen.word_details.attribution.format(
-                        attr=container.source
-                    )
+                attr_tooltip = _make_attribution(
+                    *[w.attribution for w in container.details]
                 )
-                labels.append(
-                    WALabel(
-                        attribution_text,
-                        classes="collapsible--attribution",
-                        styles="ib",
+                if attr_tooltip:
+                    attr_text = hoverable(LEX.ui.label.attribution)
+                    attr = WALabel(
+                        attr_text, classes="collapsible--attribution"
                     )
-                )
+                    attr.tooltip = attr_tooltip
+                    labels.append(attr)
 
             by_type = container.by_type
             i = 0
@@ -278,6 +292,7 @@ class WordDetailScreen(WAScreen):
                 title=section.title,
                 collapsed=False,
                 classes="word-detail--container",
+                id=id,
             )
             self._active_sections[section.key_binding] = con
             return con
@@ -306,6 +321,7 @@ class WordDetailScreen(WAScreen):
             container=self._word.definitions,
             section=DefinitionSection,
             include_attribution=True,
+            id=DefinitionSection.id,
         )
 
     def _compose_examples(self) -> Collapsible | None:
@@ -313,6 +329,7 @@ class WordDetailScreen(WAScreen):
             container=self._word.examples,
             section=ExampleSection,
             include_attribution=False,
+            id=ExampleSection.id,
         )
 
     def _compose_information(self) -> Collapsible | None:
@@ -381,22 +398,22 @@ class WordDetailScreen(WAScreen):
                     )
                 )
 
-        if elements:
-            con = Collapsible(
-                *elements,
-                title=InformationSection.title,
-                collapsed=False,
-                classes="word-detail--container",
-            )
-            self._active_sections[InformationSection.key_binding] = con
-            return con
-        return None
+        con = Collapsible(
+            *elements,
+            title=InformationSection.title,
+            collapsed=False,
+            classes="word-detail--container",
+            id=InformationSection.id,
+        )
+        self._active_sections[InformationSection.key_binding] = con
+        return con
 
     def _compose_phrases(self) -> Collapsible | None:
         return self._compose_collapsible_list(
             container=self._word.phrases,
             section=PhraseSection,
             include_attribution=False,
+            id=PhraseSection.id,
         )
 
     def _compose_related(self) -> Collapsible | None:
@@ -411,6 +428,7 @@ class WordDetailScreen(WAScreen):
                 VerbForm,
                 VerbStem,
             ],
+            id=RelatedSection.id,
         )
 
     def _compose_sidebar(self) -> ComposeResult:
@@ -465,49 +483,23 @@ class WordDetailScreen(WAScreen):
                 PhraseSection.key_binding
             ),
         )
+        section_ids = {w.id for w in self._active_sections.values()}
+        pairs = (
+            (InformationSection, infb),
+            (DefinitionSection, defb),
+            (ThesaurusSection, theb),
+            (RelatedSection, relb),
+            (ExampleSection, exab),
+            (PhraseSection, phrb),
+        )
 
-        if (
-            self._word.etymologies.has_value
-            or self._word.frequency_graph.has_value
-            or self._word.syllables.has_value
-        ):
-            active_buttons.append(infb)
-        else:
-            infb.disabled = True
-            infb.tooltip = None
-            inactive_buttons.append(infb)
-
-        if self._word.definitions.has_value:
-            active_buttons.append(defb)
-        else:
-            defb.disabled = True
-            defb.tooltip = None
-            inactive_buttons.append(defb)
-
-        if self._word.thesaurus.has_value:
-            active_buttons.append(theb)
-            active_buttons.append(relb)
-        else:
-            theb.disabled = True
-            theb.tooltip = None
-            inactive_buttons.append(theb)
-            relb.disabled = True
-            relb.tooltip = None
-            inactive_buttons.append(relb)
-
-        if self._word.examples.has_value:
-            active_buttons.append(exab)
-        else:
-            exab.disabled = True
-            exab.tooltip = None
-            inactive_buttons.append(exab)
-
-        if self._word.phrases.has_value:
-            active_buttons.append(phrb)
-        else:
-            phrb.disabled = True
-            phrb.tooltip = None
-            inactive_buttons.append(phrb)
+        for section, btn in pairs:
+            if section.id in section_ids:
+                active_buttons.append(btn)
+            else:
+                btn.disabled = True
+                btn.tooltip = None
+                inactive_buttons.append(btn)
 
         yield Sidebar(
             active_buttons + inactive_buttons, classes="with-header with-footer"
@@ -524,11 +516,12 @@ class WordDetailScreen(WAScreen):
                 Hypernym,
                 Hyponym,
             ],
+            id=ThesaurusSection.id,
         )
 
     def compose(self) -> ComposeResult:
-        yield from self._compose_sidebar()
         yield from self._compose_content()
+        yield from self._compose_sidebar()
 
         h = Header(icon="")
         h.disabled = True

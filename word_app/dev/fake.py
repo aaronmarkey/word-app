@@ -13,7 +13,6 @@ from word_app.data.grammar import (
     Miscellaneous,
 )
 from word_app.data.search_providers.models import SearchResultType
-from word_app.data.word_providers.base import AbstractWordProvider
 from word_app.ui.screens.quick_search._models import Hit, Hits
 from word_app.ui.screens.quick_search._providers import Provider
 from word_app.ui.screens.word_detail import WordDetailScreen
@@ -199,7 +198,11 @@ class FakerProvider(Provider):
 
     def _action(self, word: str):
         async def __action():
-            details = self.app.ctx.deps.word_provider.get_word_details(word)
+            details = (
+                await self.app.ctx.deps.detail_provider.get_details_for_word(
+                    word
+                )
+            )
             self.app.push_screen(WordDetailScreen(word=details))
 
         return __action
@@ -216,14 +219,3 @@ class FakerProvider(Provider):
                 text=word,
                 help=random.choice([t for t in SearchResultType]).display,
             )
-
-
-class FakeWordProvider(AbstractWordProvider):
-    FAKER: Faker = fake
-
-    def __init__(self):
-        self._word_factory_cls = WordFactory
-
-    def get_word_details(self, word: str) -> models.Word:
-        word = word.strip() or self.FAKER.word()
-        return self._word_factory_cls(word=word)

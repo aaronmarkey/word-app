@@ -21,6 +21,6 @@ class HomeScreen(WAScreen):
     def action_push_settings(self) -> None:
         self.app.push_screen(SettingsScreen(), wait_for_dismiss=False)
 
-    def action_push_word(self) -> None:
-        word = self.app.ctx.deps.word_provider.get_word_details("")
+    async def action_push_word(self) -> None:
+        word = await self.app.ctx.deps.detail_provider.get_details_for_word("")
         self.app.push_screen(WordDetailScreen(word=word))

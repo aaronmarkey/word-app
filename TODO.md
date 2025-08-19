@@ -18,13 +18,12 @@
         "Thesaurus", etc.
   - [x] Vertical scrolling.
   - [x] Subclass Button to style properly based on section type.
-- [ ] Sections
+- [x] Sections
   - [x] Collapsible sections
   - [x] Section keybindings - Numbers, 1 through 9, by order of section, number
         always same for section.
-  - [ ] Sections are disabled, collapsed, and moved to the bottom of the
+  - [x] Sections are disabled, collapsed, and moved to the bottom of the
         screen if section is empty.
-  - [ ] WordDetail providers.
 
 ### Keybindings
 - [x] Section keybindings - Numbers, 1 through 9, by order of section,
@@ -33,12 +32,17 @@
 
 ## Wordnik API Client
 - [x] Basic client for get requests.
-- [ ] Skeleton models for needed data.
-- [ ] Client methods for needed requests.
+- [x] Skeleton models for needed data.
+- [x] Client methods for needed requests.
 
 
 ## Word Details Provider
-TBA
+- [x] ABC
+- [x] FakeDetailProvider
+- [ ] MultisourseDetailProvider
+  - [ ] definitions from WN
+  - [ ] all the relateds from WN
+  - [ ] interface to inject additional WordDetail objects, already fetched.
 
 
 ## Misc

@@ -2,11 +2,20 @@ import asyncio
 from typing import AsyncGenerator, Callable
 
 from word_app.data.detail_providers.base import AbstractWordDetailProvider
-from word_app.data.models import Definition, Definitions, Nym, Thesaurus, Word
+from word_app.data.models import (
+    Definition,
+    Definitions,
+    Example,
+    Examples,
+    Nym,
+    Thesaurus,
+    Word,
+)
 from word_app.data.transformers import WnToWaTransformer
 from word_app.lib.datamuse.client import DatamuseApiClient
 from word_app.lib.wordnik.client import WordnikApiClient
 from word_app.lib.wordnik.conf import Definitions as WnDefintions
+from word_app.lib.wordnik.conf import Examples as WnExamples
 from word_app.lib.wordnik.conf import RelatedWords as WnRelatedWords
 from word_app.lib.wordnik.models import (
     AmericanHeritage,
@@ -57,6 +66,16 @@ class MultisourceDetailProvider(AbstractWordDetailProvider):
         ):
             yield definition
 
+    async def _wn_examples(self, word: str) -> AsyncGenerator:
+        async for example in self._wordnik_client.get_examples(
+            word=word,
+            endpoint=WnExamples(
+                word=WnExamples.Word(value=word),
+                limit=WnExamples.Limit(value=10),
+            ),
+        ):
+            yield example
+
     async def _wn_thesaurus(self, word: str) -> AsyncGenerator:
         async for rl in self._wordnik_client.get_related_words(
             word=word,
@@ -78,6 +97,12 @@ class MultisourceDetailProvider(AbstractWordDetailProvider):
             definitions.append(self._wordnik_transformer.defintion(wnd))
         return Definitions(definitions=definitions)
 
+    async def _examples(self, word: str) -> Examples:
+        examples: list[Example] = []
+        async for wne in self._wn_examples(word):
+            examples.append(self._wordnik_transformer.example(wne))
+        return Examples(examples=examples)
+
     async def _thesaurus(self, word: str) -> Thesaurus:
         nyms: list[Nym] = []
         async for wnr in self._wn_thesaurus(word):
@@ -98,11 +123,19 @@ class MultisourceDetailProvider(AbstractWordDetailProvider):
             on_failure = _on_failure
 
         try:
-            objs: tuple[Definitions, Thesaurus] = await asyncio.gather(
+            objs: tuple[
+                Definitions, Thesaurus, Examples
+            ] = await asyncio.gather(
                 self._definitions(word),
                 self._thesaurus(word),
+                self._examples(word),
             )
         except Exception as e:
             return on_failure(e)
         else:
-            return Word(word=word, definitions=objs[0], thesaurus=objs[1])
+            return Word(
+                word=word,
+                definitions=objs[0],
+                thesaurus=objs[1],
+                examples=objs[2],
+            )

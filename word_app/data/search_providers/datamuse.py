@@ -57,6 +57,7 @@ class DatamuseSearchProvider(Provider):
                     )
                 else:
                     raise e
+                return None
 
             if details := (
                 await self.app.ctx.deps.detail_provider.get_details_for_word(

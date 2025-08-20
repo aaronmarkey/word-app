@@ -7,12 +7,13 @@ from typing_extensions import AsyncGenerator
 
 from word_app.lib.wordnik.conf import (
     Definitions,
+    Examples,
     RelatedWords,
     WordnikApiConf,
     WordnikEndpoint,
 )
 from word_app.lib.wordnik.exceptions import FailedToRefetchResult, Unauthorized
-from word_app.lib.wordnik.models import Definition, Related
+from word_app.lib.wordnik.models import Definition, Example, Related
 from word_app.lib.wordnik.transformer import WordnikTransformer
 
 
@@ -63,6 +64,13 @@ class WordnikApiClient:
         resp = await self._request(word, endpoint)
         for definition in self.transformer.defintions(resp.json()):
             yield definition
+
+    async def get_examples(
+        self, *, word: str, endpoint: Examples
+    ) -> AsyncGenerator[Example]:
+        resp = await self._request(word, endpoint)
+        for example in self.transformer.example_search_result(resp.json()):
+            yield example
 
     async def get_related_words(
         self, *, word: str, endpoint: RelatedWords

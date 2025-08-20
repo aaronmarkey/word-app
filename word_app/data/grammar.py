@@ -39,6 +39,7 @@ VerbTransitive = Grammar(title="verb transitive")
 
 Miscellaneous = Grammar(title="miscellaneous")
 Nothing = Grammar(title="nothing")
+Sentence = Grammar(title="sentence")
 
 Synonym = Grammar(title="synonym")
 Antonym = Grammar(title="antonym")
@@ -88,6 +89,7 @@ DICTIONARY_GRAMMARS = [
     VerbTransitive,
     Miscellaneous,
     Nothing,
+    Sentence,
 ]
 
 THESAURUS_GRAMMARS = [

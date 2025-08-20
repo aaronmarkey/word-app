@@ -37,6 +37,12 @@ class WordnikEndpoint(Endpoint):
 
 
 @dataclass
+class _Limit(Param):
+    name: str = field(default="limit")
+    value: int = field(default=500)
+
+
+@dataclass
 class _UseCanonical(Param):
     name: str = field(default="useCanonical")
     value: bool = field(default=False)
@@ -66,11 +72,6 @@ class Definitions(WordnikEndpoint):
         value: bool = field(default=False)
 
     @dataclass
-    class Limit(Param):
-        name: str = field(default="limit")
-        value: int = field(default=500)
-
-    @dataclass
     class PartOfSpeech(EnumParam):
         name: str = field(default="partOfSpeech")
         value: list[POSEnum] = field(default_factory=list)
@@ -88,6 +89,7 @@ class Definitions(WordnikEndpoint):
                 {self.name: [str(d) for d in self.value]} if self.value else {}
             )
 
+    Limit: TypeAlias = _Limit  # type: ignore
     UseCanonical: TypeAlias = _UseCanonical  # type: ignore
     Word: TypeAlias = _Word  # type: ignore
 
@@ -99,6 +101,32 @@ class Definitions(WordnikEndpoint):
     source_dictionaries: SourceDictionaries = field(
         default_factory=SourceDictionaries
     )
+    use_canonical: UseCanonical = field(default_factory=UseCanonical)
+    word: Word = field(default_factory=Word)
+
+
+@dataclass
+class Examples(WordnikEndpoint):
+    @dataclass
+    class IncludeDuplicates(Param):
+        name: str = field(default="includeDuplicates")
+        value: bool = field(default=False)
+
+    @dataclass
+    class Skip(Param):
+        name: str = field(default="skip")
+        value: int | None = field(default=None)
+
+    Limit: TypeAlias = _Limit  # type: ignore
+    UseCanonical: TypeAlias = _UseCanonical  # type: ignore
+    Word: TypeAlias = _Word  # type: ignore
+
+    _endpoint_purpose: str = "examples"
+    include_duplicates: IncludeDuplicates = field(
+        default_factory=IncludeDuplicates
+    )
+    limit: Limit = field(default_factory=Limit)
+    skip: Skip = field(default_factory=Skip)
     use_canonical: UseCanonical = field(default_factory=UseCanonical)
     word: Word = field(default_factory=Word)
 

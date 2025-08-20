@@ -5,11 +5,17 @@ from enum import StrEnum
 
 from wordnik.models import (  # noqa
     Citation,
+    ContentProvider,
     Definition,
+    Example,
+    ExampleSearchResults,
     ExampleUsage,
+    Facet,
     Label,
     Note,
     Related,
+    ScoredWord,
+    Sentence,
     TextPron,
 )
 

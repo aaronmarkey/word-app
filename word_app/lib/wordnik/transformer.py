@@ -7,11 +7,17 @@ from wordnik.models import *  # noqa: F403
 
 from word_app.lib.wordnik.models import (  # noqa
     Citation,
+    ContentProvider,
     Definition,
+    Example,
+    ExampleSearchResults,
     ExampleUsage,
+    Facet,
     Label,
     Note,
     Related,
+    ScoredWord,
+    Sentence,
     TextPron,
 )
 
@@ -90,6 +96,10 @@ def deserialize(obj, objClass):
 class WordnikTransformer:
     def defintions(self: Self, response: list[dict]) -> list[Definition]:  # noqa: F405
         return deserialize(response, "list[Definition]")
+
+    def example_search_result(self: Self, response: dict) -> list[Example]:  # noqa: F405
+        results = deserialize(response, "ExampleSearchResults")
+        return results.examples
 
     def related(self: Self, response: list[dict]) -> list[Related]:  # noqa: F405
         return deserialize(response, "list[Related]")

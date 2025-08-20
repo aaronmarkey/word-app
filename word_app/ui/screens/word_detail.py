@@ -2,9 +2,10 @@ from statistics import mean
 
 import pyperclip
 from pydantic import BaseModel
+from textual import on
 from textual.app import ComposeResult
 from textual.containers import HorizontalGroup, ItemGrid, VerticalScroll
-from textual.events import Key, MouseDown, MouseEvent, MouseUp
+from textual.events import Key
 from textual.widget import Widget
 from textual.widgets import (
     Button,
@@ -34,38 +35,14 @@ from word_app.ext import WAScreen
 from word_app.lex import LEX, LEX_FMT
 from word_app.ui.constants import HELP_HOVER_ICON
 from word_app.ui.utils import hoverable
-from word_app.ui.widgets import Sidebar, SidebarButton, WALabel
-
-
-class ClickableSentence:
-    def __init__(self, sentence: str, *, action: str) -> None:
-        self._sentence = sentence
-        self._action = action
-
-    def _for_word(self, word: str) -> str:
-        allowed_non_alpha = {"-", "'", '"'}
-        sanitized = ""
-
-        for character in word:
-            if character.isalpha() or character in allowed_non_alpha:
-                sanitized += character
-
-        callable = f"screen.{self._action}('{sanitized}')"
-        new_word = f"[@click={callable}][u]{sanitized}[/][/]"
-
-        return word.replace(sanitized, new_word)
-
-    def _convert(self) -> str:
-        words = self._sentence.split(" ")
-        clickables: list[str] = []
-
-        for word in words:
-            clickables.append(self._for_word(word))
-
-        return "[u] [/]".join(clickables)
-
-    def __str__(self) -> str:
-        return self._convert()
+from word_app.ui.widgets import (
+    ClickablePhrase,
+    ClickableSentence,
+    ClickableText,
+    Sidebar,
+    SidebarButton,
+    WALabel,
+)
 
 
 class WordDetailSection(BaseModel):
@@ -157,7 +134,6 @@ class WordDetailScreen(WAScreen):
         super().__init__()
         self._word = word
         self._active_sections: dict[str, Collapsible] = {}
-        self._current_click_event: MouseEvent | None = None
 
         self.title = f"{self.WA_ICON}  {self._word.word}"
 
@@ -195,12 +171,11 @@ class WordDetailScreen(WAScreen):
 
                     # Create a list of *nyms and calculate the longest word
                     # for column padding.
-                    items: list[Label] = []
+                    items: list[Widget] = []
                     for nym in nyms:
                         if len(nym.text) > longest_word:
                             longest_word = len(nym.text)
-                        lt = ClickableSentence(nym.text, action="click_word")
-                        items.append(Label(str(lt)))
+                        items.append(ClickablePhrase(nym.text))
                     # Everything goes in an item grid for dynamic layout.
                     content.append(
                         ItemGrid(
@@ -268,14 +243,7 @@ class WordDetailScreen(WAScreen):
                 for j, detail in enumerate(details):
                     horizontal = HorizontalGroup(
                         Label(f"[b]{j + 1}.[/]"),
-                        Label(
-                            str(
-                                ClickableSentence(
-                                    detail.text, action="click_word"
-                                )
-                            ),
-                            classes="text",
-                        ),
+                        ClickableSentence(detail.text, classes="text"),
                         classes=(
                             "collapsible--list "
                             f"collapsible--{section.css_class}"
@@ -530,12 +498,12 @@ class WordDetailScreen(WAScreen):
         yield Footer()
 
     # Event Listeners
-    def action_click_word(self, word: str) -> None:
-        if event := self._current_click_event:
-            if event.button == 1:
-                print(f"Go to word details for '{word}'.")
-            elif event.button == 2:
-                pyperclip.copy(word)
+    @on(ClickableText.TextClicked)
+    def on_word_click(self, event: ClickableText.TextClicked) -> None:
+        if event.click.button == 1:
+            print(f"Go to word details for '{event.word}'.")
+        elif event.click.button == 2:
+            pyperclip.copy(event.word)
 
     def action_close_all_sections(self) -> None:
         for section in self._active_sections.values():
@@ -546,14 +514,6 @@ class WordDetailScreen(WAScreen):
         key_bind = self.SidebarButtonManager.parse_button_id(id_)
         if widget := self._active_sections.get(key_bind, None):
             self._wa_scroll_to(collapsible=widget)
-
-    def on_mouse_down(self, event: MouseDown) -> None:
-        # Hacky way to get the event from an
-        # inline-link action (ClickableSentence).
-        self._current_click_event = event
-
-    def on_mouse_up(self, _: MouseUp):
-        self._current_click_event = None
 
     def on_key(self, event: Key) -> None:
         # Scroll the section if it's keyboard shortcut is pressed.

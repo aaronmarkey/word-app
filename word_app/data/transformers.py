@@ -1,13 +1,21 @@
 from typing import ClassVar
 
+from markdown_it import MarkdownIt
+
 from word_app.data import grammar
-from word_app.data.models import Definition, Nym
+from word_app.data.models import Definition, Example, Nym
 from word_app.lib.wordnik.models import Definition as WnDefinition
+from word_app.lib.wordnik.models import Example as WnExample
 from word_app.lib.wordnik.models import PartOfSpeech, RelationshipType
 from word_app.lib.wordnik.models import Related as WnRelated
+from word_app.utils import HtmlToMarkup
 
 
 class WnToWaTransformer:
+    _HTML_TO_MARKUP: ClassVar[HtmlToMarkup] = HtmlToMarkup()
+    _MARKDOWN: ClassVar[MarkdownIt] = MarkdownIt(
+        "commonmark", {"breaks": False, "html": True}
+    )
     _POS_TO_GRAMMER: ClassVar[dict[PartOfSpeech, grammar.Grammar]] = {
         PartOfSpeech.NOUN: grammar.Noun,
         PartOfSpeech.ADJECTIVE: grammar.Adjective,
@@ -61,6 +69,11 @@ class WnToWaTransformer:
         return Definition(
             attribution=inp.attributionText or "", type=g, text=inp.text
         )
+
+    def example(self, inp: WnExample) -> Example:
+        sentence = self._MARKDOWN.render(inp.text)
+        sentence = self._HTML_TO_MARKUP.transform(sentence)
+        return Example(attribution="", type=grammar.Sentence, text=sentence)
 
     def thesaurus(self, inp: WnRelated) -> list[Nym]:
         return [

@@ -14,6 +14,11 @@ Collapsible.word-detail--container {
             padding-right: 2;
         }
 
+        ClickableSentence.text {
+            margin-left: 1;
+            width: 100%;
+        }
+
         Label.text {
             margin-left: 1;
             width: 100%;

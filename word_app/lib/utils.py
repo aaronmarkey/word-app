@@ -1,6 +1,17 @@
 from dataclasses import dataclass, field, fields
 from typing import Any
 
+import httpx
+from httpx_retries import Retry, RetryTransport
+
+
+def http_client_factory(
+    retry_total: int = 5, retry_backoff_factor: float = 0.5
+) -> httpx.AsyncClient:
+    return httpx.AsyncClient(
+        transport=RetryTransport(retry=Retry(total=5, backoff_factor=0.5))
+    )
+
 
 def make_value_error(name: str, value: str) -> None:
     """Helper to raise an error for some validation issue."""

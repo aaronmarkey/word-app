@@ -12,11 +12,14 @@ from wordnik.models import (  # noqa
     ExampleSearchResults,
     ExampleUsage,
     Facet,
+    Frequency,
+    FrequencySummary,
     Label,
     Note,
     Related,
     ScoredWord,
     Sentence,
+    Syllable,
     TextPron,
 )
 

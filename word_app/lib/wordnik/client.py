@@ -5,16 +5,25 @@ from typing import Any
 import httpx
 from typing_extensions import AsyncGenerator
 
+from word_app.lib.utils import http_client_factory
 from word_app.lib.wordnik.conf import (
     Definitions,
     Examples,
+    Frequency,
+    Hyphenation,
     Phrases,
     RelatedWords,
     WordnikApiConf,
     WordnikEndpoint,
 )
 from word_app.lib.wordnik.exceptions import FailedToRefetchResult, Unauthorized
-from word_app.lib.wordnik.models import Definition, Example, Related
+from word_app.lib.wordnik.models import (
+    Definition,
+    Example,
+    FrequencySummary,
+    Related,
+    Syllable,
+)
 from word_app.lib.wordnik.transformer import WordnikTransformer
 
 
@@ -23,7 +32,7 @@ class WordnikApiClient:
         self, *, conf: WordnikApiConf, client: httpx.AsyncClient | None = None
     ) -> None:
         self.conf = conf
-        self.client = client or httpx.AsyncClient()
+        self.client = client or http_client_factory()
         self.transformer = WordnikTransformer()
         self._cookie: str | None = None
 
@@ -72,6 +81,19 @@ class WordnikApiClient:
         resp = await self._request(word, endpoint)
         for example in self.transformer.example_search_result(resp.json()):
             yield example
+
+    async def get_frequency(
+        self, *, word: str, endpoint: Frequency
+    ) -> FrequencySummary:
+        resp = await self._request(word, endpoint)
+        return self.transformer.frequency_summary(resp.json())
+
+    async def get_hyphenation(
+        self, *, word: str, endpoint: Hyphenation
+    ) -> AsyncGenerator[Syllable]:
+        resp = await self._request(word, endpoint)
+        for syllable in self.transformer.syllable(resp.json()):
+            yield syllable
 
     async def get_phrases(
         self, *, word: str, endpoint: Phrases

@@ -32,7 +32,11 @@ def create_real_app() -> WordApp:
         detail_provider=MultisourceDetailProvider(
             datamuse_client="",
             datamuse_transformer="",
-            wordnik_client=WordnikApiClient(conf=WordnikApiConf(api_key="")),
+            wordnik_client=WordnikApiClient(
+                conf=WordnikApiConf(
+                    api_key="obkyc4vokx6faqzbl7x8l594vd26vzbdaemzo4t3jdq4q704j"
+                )
+            ),
             wordnik_transformer=WnToWaTransformer(),
         ),
         light_theme=LightTheme,

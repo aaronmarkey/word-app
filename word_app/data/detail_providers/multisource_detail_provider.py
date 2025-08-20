@@ -7,9 +7,13 @@ from word_app.data.models import (
     Definitions,
     Example,
     Examples,
+    FrequencyGraph,
+    FrequencyInterval,
     Nym,
     Phrase,
     Phrases,
+    Syllable,
+    Syllables,
     Thesaurus,
     Word,
 )
@@ -18,10 +22,13 @@ from word_app.lib.datamuse.client import DatamuseApiClient
 from word_app.lib.wordnik.client import WordnikApiClient
 from word_app.lib.wordnik.conf import Definitions as WnDefintions
 from word_app.lib.wordnik.conf import Examples as WnExamples
+from word_app.lib.wordnik.conf import Frequency as WnFrequency
+from word_app.lib.wordnik.conf import Hyphenation as WnHyphenation
 from word_app.lib.wordnik.conf import Phrases as WnPhrases
 from word_app.lib.wordnik.conf import RelatedWords as WnRelatedWords
 from word_app.lib.wordnik.models import (
     AmericanHeritage,
+    FrequencySummary,
     RelationshipType,
 )
 
@@ -90,6 +97,27 @@ class MultisourceDetailProvider(AbstractWordDetailProvider):
         ):
             yield example
 
+    async def _wn_frequency(self, word: str) -> FrequencySummary:
+        return await self._wordnik_client.get_frequency(
+            word=word,
+            endpoint=WnFrequency(
+                word=WnFrequency.Word(value=word),
+            ),
+        )
+
+    async def _wn_syllables(self, word: str) -> AsyncGenerator:
+        async for syllable in self._wordnik_client.get_hyphenation(
+            word=word,
+            endpoint=WnHyphenation(
+                word=WnHyphenation.Word(value=word),
+                limit=WnHyphenation.Limit(value=1),
+                source_dictionaries=WnHyphenation.SourceDictionaries(
+                    value=[AmericanHeritage]
+                ),
+            ),
+        ):
+            yield syllable
+
     async def _wn_thesaurus(self, word: str) -> AsyncGenerator:
         async for rl in self._wordnik_client.get_related_words(
             word=word,
@@ -108,7 +136,8 @@ class MultisourceDetailProvider(AbstractWordDetailProvider):
     async def _definitions(self, word: str) -> Definitions:
         definitions: list[Definition] = []
         async for wnd in self._wn_definitions(word):
-            definitions.append(self._wordnik_transformer.defintion(wnd))
+            if d := self._wordnik_transformer.defintion(wnd):
+                definitions.append(d)
         return Definitions(definitions=definitions)
 
     async def _examples(self, word: str) -> Examples:
@@ -117,11 +146,31 @@ class MultisourceDetailProvider(AbstractWordDetailProvider):
             examples.append(self._wordnik_transformer.example(wne))
         return Examples(examples=examples)
 
+    async def _frequency(self, word: str) -> FrequencyGraph:
+        fi: list[FrequencyInterval] = []
+        freq = await self._wn_frequency(word)
+        highest_value = max(*freq.frequency, key=lambda f: f.count).count
+        for i in freq.frequency:
+            fi.append(
+                FrequencyInterval(
+                    start=i.year,
+                    end=i.year,
+                    value=float(i.count / highest_value),
+                )
+            )
+        return FrequencyGraph(intervals=fi)
+
     async def _phrases(self, word: str) -> Phrases:
         phrases: list[Phrase] = []
         async for wnb in self._wn_bigrams(word):
             phrases.append(self._wordnik_transformer.phrase(wnb))
         return Phrases(phrases=phrases)
+
+    async def _syllables(self, word: str) -> Syllables:
+        syllables: list[Syllable] = []
+        async for wns in self._wn_syllables(word):
+            syllables.append(self._wordnik_transformer.syllable(wns))
+        return Syllables(syllables=syllables)
 
     async def _thesaurus(self, word: str) -> Thesaurus:
         nyms: list[Nym] = []
@@ -144,12 +193,19 @@ class MultisourceDetailProvider(AbstractWordDetailProvider):
 
         try:
             objs: tuple[
-                Definitions, Thesaurus, Examples, Phrases
+                Definitions,
+                Thesaurus,
+                Examples,
+                Phrases,
+                Syllables,
+                FrequencyGraph,
             ] = await asyncio.gather(
                 self._definitions(word),
                 self._thesaurus(word),
                 self._examples(word),
                 self._phrases(word),
+                self._syllables(word),
+                self._frequency(word),
             )
         except Exception as e:
             return on_failure(e)
@@ -160,4 +216,6 @@ class MultisourceDetailProvider(AbstractWordDetailProvider):
                 thesaurus=objs[1],
                 examples=objs[2],
                 phrases=objs[3],
+                syllables=objs[4],
+                frequency_graph=objs[5],
             )

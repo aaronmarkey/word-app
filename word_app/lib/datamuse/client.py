@@ -14,6 +14,7 @@ from word_app.lib.datamuse.conf import (
 from word_app.lib.datamuse.exceptions import FailedToRefetchResult
 from word_app.lib.datamuse.models import Suggestion, Word
 from word_app.lib.datamuse.transformer import DatamuseTransformer
+from word_app.lib.utils import http_client_factory
 
 
 class DatamuseApiClient:
@@ -29,7 +30,7 @@ class DatamuseApiClient:
         conf: DatamuseApiConf | None = None,
     ) -> None:
         self.conf = conf or DEFAULT_API_CONF
-        self.client = client or httpx.AsyncClient()
+        self.client = client or http_client_factory()
         self.transformer = DatamuseTransformer()
 
     async def _request(self, *, endpoint: DatamuseEndpoint) -> httpx.Response:

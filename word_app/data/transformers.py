@@ -3,12 +3,13 @@ from typing import ClassVar
 from markdown_it import MarkdownIt
 
 from word_app.data import grammar
-from word_app.data.models import Definition, Example, Nym, Phrase
+from word_app.data.models import Definition, Example, Nym, Phrase, Syllable
 from word_app.lib.wordnik.models import Bigram as WnBigram
 from word_app.lib.wordnik.models import Definition as WnDefinition
 from word_app.lib.wordnik.models import Example as WnExample
 from word_app.lib.wordnik.models import PartOfSpeech, RelationshipType
 from word_app.lib.wordnik.models import Related as WnRelated
+from word_app.lib.wordnik.models import Syllable as WnSyllable
 from word_app.utils import HtmlToMarkup
 
 
@@ -65,11 +66,15 @@ class WnToWaTransformer:
         RelationshipType.HAS_TOPIC: grammar.HasTopic,
     }
 
-    def defintion(self, inp: WnDefinition) -> Definition:
-        g = self._POS_TO_GRAMMER.get(inp.partOfSpeech, grammar.Miscellaneous)
-        return Definition(
-            attribution=inp.attributionText or "", type=g, text=inp.text
-        )
+    def defintion(self, inp: WnDefinition) -> Definition | None:
+        if text := (inp.text or "").strip():
+            g = self._POS_TO_GRAMMER.get(
+                inp.partOfSpeech, grammar.Miscellaneous
+            )
+            return Definition(
+                attribution=inp.attributionText or "", type=g, text=text
+            )
+        return None
 
     def example(self, inp: WnExample) -> Example:
         sentence = self._MARKDOWN.render(inp.text)
@@ -79,6 +84,9 @@ class WnToWaTransformer:
     def phrase(self, inp: WnBigram) -> Phrase:
         text = f"{inp.gram1} {inp.gram2}" if inp.gram2 else inp.gram1
         return Phrase(attribution="", type=grammar.Nothing, text=text)
+
+    def syllable(self, inp: WnSyllable) -> Syllable:
+        return Syllable(text=inp.text)
 
     def thesaurus(self, inp: WnRelated) -> list[Nym]:
         return [

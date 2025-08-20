@@ -33,6 +33,7 @@ from word_app.data.grammar import (
 from word_app.data.models import Word, WordDetailContainer
 from word_app.ext import WAScreen
 from word_app.lex import LEX, LEX_FMT
+from word_app.lib.wordnik.exceptions import Unauthorized
 from word_app.ui.constants import HELP_HOVER_ICON
 from word_app.ui.utils import hoverable
 from word_app.ui.widgets import (
@@ -345,7 +346,7 @@ class WordDetailScreen(WAScreen):
         if self._word.frequency_graph.has_value:
             in_order = self._word.frequency_graph.in_order
             label_css = "collapsible--pos"
-            if self._word.etymologies.has_value:
+            if self._word.frequency_graph.has_value:
                 label_css += " mt-1"
                 flabel = WALabel(
                     f"{LEX.ui.label.frequency} {HELP_HOVER_ICON}",
@@ -499,7 +500,7 @@ class WordDetailScreen(WAScreen):
 
     # Event Listeners
     @on(ClickableText.TextClicked)
-    def on_word_click(self, event: ClickableText.TextClicked) -> None:
+    async def on_word_click(self, event: ClickableText.TextClicked) -> None:
         if event.word.lower() == self._word.word.lower():
             self.app.notify(
                 LEX.screen.word_details.already_here,
@@ -509,7 +510,25 @@ class WordDetailScreen(WAScreen):
             )
             return None
         if event.click.button == 1:
-            print(f"Go to word details for '{event.word}'.")
+
+            def _on_failure(e: Exception) -> None:
+                if type(e) is Unauthorized:
+                    self.screen.app.notify(
+                        LEX.screen.quick_search.failure_auth,
+                        title=LEX.ui.label.error,
+                        timeout=self.screen.app.NOTIFICATION_TIMEOUT,
+                        severity="error",
+                    )
+                else:
+                    raise e
+                return None
+
+            if details := (
+                await self.app.ctx.deps.detail_provider.get_details_for_word(
+                    event.word.lower(), _on_failure
+                )
+            ):
+                self.app.push_screen(WordDetailScreen(word=details))
         elif event.click.button == 2:
             pyperclip.copy(event.word)
 

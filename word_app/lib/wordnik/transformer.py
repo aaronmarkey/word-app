@@ -3,8 +3,6 @@ import datetime
 import re
 from typing import Self
 
-from wordnik.models import *  # noqa: F403
-
 from word_app.lib.wordnik.models import (  # noqa
     Bigram,
     Citation,
@@ -14,11 +12,14 @@ from word_app.lib.wordnik.models import (  # noqa
     ExampleSearchResults,
     ExampleUsage,
     Facet,
+    Frequency,
+    FrequencySummary,
     Label,
     Note,
     Related,
     ScoredWord,
     Sentence,
+    Syllable,
     TextPron,
 )
 
@@ -102,8 +103,14 @@ class WordnikTransformer:
         results = deserialize(response, "ExampleSearchResults")
         return results.examples
 
+    def frequency_summary(self: Self, response: dict) -> FrequencySummary:
+        return deserialize(response, "FrequencySummary")
+
     def bigrams(self: Self, response: list[dict]) -> list[Bigram]:
         return deserialize(response, "list[Bigram]")
+
+    def syllable(self: Self, response: list[dict]) -> list[Syllable]:
+        return deserialize(response, "list[Syllable]")
 
     def related(self: Self, response: list[dict]) -> list[Related]:  # noqa: F405
         return deserialize(response, "list[Related]")

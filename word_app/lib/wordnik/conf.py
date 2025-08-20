@@ -43,6 +43,18 @@ class _Limit(Param):
 
 
 @dataclass
+class _SourceDictionaries(Param):
+    name: str = field(default="sourceDictionaries")
+    value: list[SourceDictionary] = field(
+        default_factory=lambda: [AmericanHeritage]
+    )
+
+    @property
+    def as_dict(self) -> dict:
+        return {self.name: [str(d) for d in self.value]} if self.value else {}
+
+
+@dataclass
 class _UseCanonical(Param):
     name: str = field(default="useCanonical")
     value: bool = field(default=False)
@@ -76,20 +88,8 @@ class Definitions(WordnikEndpoint):
         name: str = field(default="partOfSpeech")
         value: list[POSEnum] = field(default_factory=list)
 
-    @dataclass
-    class SourceDictionaries(Param):
-        name: str = field(default="sourceDictionaries")
-        value: list[SourceDictionary] = field(
-            default_factory=lambda: [AmericanHeritage]
-        )
-
-        @property
-        def as_dict(self) -> dict:
-            return (
-                {self.name: [str(d) for d in self.value]} if self.value else {}
-            )
-
     Limit: TypeAlias = _Limit  # type: ignore
+    SourceDictionaries: TypeAlias = _SourceDictionaries  # type: ignore
     UseCanonical: TypeAlias = _UseCanonical  # type: ignore
     Word: TypeAlias = _Word  # type: ignore
 
@@ -127,6 +127,43 @@ class Examples(WordnikEndpoint):
     )
     limit: Limit = field(default_factory=Limit)
     skip: Skip = field(default_factory=Skip)
+    use_canonical: UseCanonical = field(default_factory=UseCanonical)
+    word: Word = field(default_factory=Word)
+
+
+@dataclass
+class Frequency(WordnikEndpoint):
+    @dataclass
+    class Year(Param):
+        name: str = field(default="year")
+        value: int | None = field(default=None)
+
+    UseCanonical: TypeAlias = _UseCanonical  # type: ignore
+    Word: TypeAlias = _Word  # type: ignore
+
+    _endpoint_purpose: str = "frequency"
+    end_year: Year = field(
+        default_factory=lambda: Frequency.Year(name="endYear", value=2012)
+    )
+    start_year: Year = field(
+        default_factory=lambda: Frequency.Year(name="startYear", value=1800)
+    )
+    use_canonical: UseCanonical = field(default_factory=UseCanonical)
+    word: Word = field(default_factory=Word)
+
+
+@dataclass
+class Hyphenation(WordnikEndpoint):
+    Limit: TypeAlias = _Limit  # type: ignore
+    SourceDictionaries: TypeAlias = _SourceDictionaries  # type: ignore
+    UseCanonical: TypeAlias = _UseCanonical  # type: ignore
+    Word: TypeAlias = _Word  # type: ignore
+
+    _endpoint_purpose: str = "hyphenation"
+    limit: Limit = field(default_factory=Limit)
+    source_dictionaries: SourceDictionaries = field(
+        default_factory=SourceDictionaries
+    )
     use_canonical: UseCanonical = field(default_factory=UseCanonical)
     word: Word = field(default_factory=Word)
 

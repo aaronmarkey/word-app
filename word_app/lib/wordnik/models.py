@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from dataclasses import dataclass
 from enum import StrEnum
 
@@ -72,10 +74,14 @@ class RelationshipType(StrEnum):
     FORM = "form"
     ETYMOLOGLYCALY_RELATED_TERM = "etymologically-related-term"
     HYPERNYM = "hypernym"
-    HYPERSONYM = "hyponym"
+    HYPONYM = "hyponym"
     INFLECTED_FORM = "inflected-form"
     PRIMARY = "primary"
     SAME_CONTEXT = "same-context"
     VERB_FORM = "verb-form"
     VERB_STEM = "verb-stem"
     HAS_TOPIC = "has-topic"
+
+    @classmethod
+    def all(cls) -> None:
+        return None

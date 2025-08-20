@@ -48,6 +48,7 @@ class Lexicon:
     class screen:
         @frozen
         class quick_search:
+            failure_auth: str = _("screen.quick_search.failure_auth")
             help: str = _("screen.quick_search.help")
             tooltip: str = _("screen.quick_help.tooltip")
             no_matches: str = _("screen.quick_search.no_matches")
@@ -115,6 +116,7 @@ class Lexicon:
         class label:
             attribution: str = _("ui.label.attribution")
             etymologies: str = _("ui.label.etymologies")
+            error: str = _("ui.label.error")
             frequency: str = _("ui.label.frequency")
             syllables: str = _("ui.label.syllables")
             word: str = _("ui.label.word")

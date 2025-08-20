@@ -1,3 +1,5 @@
+from typing import Callable
+
 from faker import Faker
 
 from word_app.data.detail_providers.base import AbstractWordDetailProvider
@@ -13,6 +15,8 @@ class FakeDetailProvider(AbstractWordDetailProvider):
             raise ValueError("Missing faker kwargs to FakeDetailProvider.")
         self._word_factory_cls = WordFactory
 
-    async def get_details_for_word(self, word: str) -> Word:
+    async def get_details_for_word(
+        self, word: str, on_failure: Callable[[Exception], None] | None = None
+    ) -> Word | None:
         word = word.strip() or self._fake.word()
         return self._word_factory_cls(word=word)

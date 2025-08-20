@@ -1,4 +1,5 @@
 from copy import deepcopy
+from http import HTTPStatus
 from typing import Any
 
 import httpx
@@ -10,7 +11,7 @@ from word_app.lib.wordnik.conf import (
     WordnikApiConf,
     WordnikEndpoint,
 )
-from word_app.lib.wordnik.exceptions import FailedToRefetchResult
+from word_app.lib.wordnik.exceptions import FailedToRefetchResult, Unauthorized
 from word_app.lib.wordnik.models import Definition, Related
 from word_app.lib.wordnik.transformer import WordnikTransformer
 
@@ -49,6 +50,10 @@ class WordnikApiClient:
             resp = await self.client.get(location, **kwargs)
             resp.raise_for_status()
             return resp
+        except httpx.HTTPStatusError as exc:
+            if exc.response.status_code == HTTPStatus.UNAUTHORIZED:
+                raise Unauthorized() from exc
+            raise FailedToRefetchResult() from exc
         except (httpx.RequestError, httpx.HTTPError) as exc:
             raise FailedToRefetchResult() from exc
 

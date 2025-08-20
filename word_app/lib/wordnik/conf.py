@@ -113,12 +113,12 @@ class RelatedWords(WordnikEndpoint):
     @dataclass
     class RelationshipTypes(EnumParam):
         name: str = field(default="relationshipTypes")
-        value: list[RTEnum] = field(default_factory=list)
+        value: list[RTEnum] | None = field(default=None)
 
     UseCanonical: TypeAlias = _UseCanonical  # type: ignore
     Word: TypeAlias = _Word  # type: ignore
 
-    _endpoint: str = "relatedWords"
+    _endpoint_purpose: str = "relatedWords"
     limit_per_relationship_type: LimitPerRelationshipType = field(
         default_factory=LimitPerRelationshipType
     )

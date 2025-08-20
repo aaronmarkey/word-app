@@ -1,14 +1,16 @@
 import asyncio
-from typing import AsyncGenerator
+from typing import AsyncGenerator, Callable
 
 from word_app.data.detail_providers.base import AbstractWordDetailProvider
-from word_app.data.models import Definition, Definitions, Word
+from word_app.data.models import Definition, Definitions, Nym, Thesaurus, Word
 from word_app.data.transformers import WnToWaTransformer
 from word_app.lib.datamuse.client import DatamuseApiClient
 from word_app.lib.wordnik.client import WordnikApiClient
 from word_app.lib.wordnik.conf import Definitions as WnDefintions
+from word_app.lib.wordnik.conf import RelatedWords as WnRelatedWords
 from word_app.lib.wordnik.models import (
     AmericanHeritage,
+    RelationshipType,
 )
 
 
@@ -29,11 +31,11 @@ class MultisourceDetailProvider(AbstractWordDetailProvider):
 
         if datamuse_client is None or wordnik_client is None:
             raise ValueError(
-                "Mission required clients for MultisourceDetailProvider object."
+                "Missing required clients for MultisourceDetailProvider object."
             )
         if datamuse_transformer is None or wordnik_transformer is None:
             raise ValueError(
-                "Mission required transformers for "
+                "Missing required transformers for "
                 "MultisourceDetailProvider object."
             )
         self._datamuse_client: DatamuseApiClient = datamuse_client
@@ -55,13 +57,52 @@ class MultisourceDetailProvider(AbstractWordDetailProvider):
         ):
             yield definition
 
-    async def get_details_for_word(self, word: str) -> Word:
-        async def definitions() -> Definitions:
-            definitions: list[Definition] = []
-            async for wnd in self._wn_definitions(word):
-                definitions.append(self._wordnik_transformer.defintion(wnd))
-            return Definitions(definitions=definitions)
+    async def _wn_thesaurus(self, word: str) -> AsyncGenerator:
+        async for rl in self._wordnik_client.get_related_words(
+            word=word,
+            endpoint=WnRelatedWords(
+                word=WnRelatedWords.Word(value=word),
+                limit_per_relationship_type=WnRelatedWords.LimitPerRelationshipType(
+                    value=1000
+                ),
+                relationship_types=WnRelatedWords.RelationshipTypes(
+                    value=RelationshipType.all()
+                ),
+            ),
+        ):
+            yield rl
 
-        objs: tuple[Definitions] = await asyncio.gather(definitions())
+    async def _definitions(self, word: str) -> Definitions:
+        definitions: list[Definition] = []
+        async for wnd in self._wn_definitions(word):
+            definitions.append(self._wordnik_transformer.defintion(wnd))
+        return Definitions(definitions=definitions)
+
+    async def _thesaurus(self, word: str) -> Thesaurus:
+        nyms: list[Nym] = []
+        async for wnr in self._wn_thesaurus(word):
+            nyms.extend(self._wordnik_transformer.thesaurus(wnr))
+        return Thesaurus(nyms=nyms)
+
+    async def clean(self) -> None:
         await self._wordnik_client.clean()
-        return Word(word=word, definitions=objs[0])
+
+    async def get_details_for_word(
+        self, word: str, on_failure: Callable[[Exception], None] | None = None
+    ) -> Word | None:
+        if on_failure is None:
+
+            def _on_failure(e: Exception) -> None:
+                raise e
+
+            on_failure = _on_failure
+
+        try:
+            objs: tuple[Definitions, Thesaurus] = await asyncio.gather(
+                self._definitions(word),
+                self._thesaurus(word),
+            )
+        except Exception as e:
+            return on_failure(e)
+        else:
+            return Word(word=word, definitions=objs[0], thesaurus=objs[1])

@@ -16,6 +16,7 @@ class WordApp(App):
     ]
 
     CSS_PATH = "main.css"
+    NOTIFY_TIMEOUT = 5.0
     SCREENS = {"home": HomeScreen}
     TOOLTIP_DELAY = 0.2
 

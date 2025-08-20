@@ -12,9 +12,11 @@ from word_app.data.search_providers.parser import (
     ParseResult,
     RegexSearchTermParser,
 )
+from word_app.lex import LEX
 from word_app.lib.datamuse.client import DatamuseApiClient
 from word_app.lib.datamuse.exceptions import DatamuseError
 from word_app.lib.datamuse.models import DatamuseModel, Suggestion, Word
+from word_app.lib.wordnik.exceptions import Unauthorized
 from word_app.ui.screens.quick_search._models import Hit, Hits
 from word_app.ui.screens.quick_search._providers import Provider
 from word_app.ui.screens.word_detail import WordDetailScreen
@@ -45,12 +47,23 @@ class DatamuseSearchProvider(Provider):
 
     def _action(self, word: str):
         async def __action():
-            details = (
+            def _on_failure(e: Exception) -> None:
+                if type(e) is Unauthorized:
+                    self.screen.app.notify(
+                        LEX.screen.quick_search.failure_auth,
+                        title=LEX.ui.label.error,
+                        timeout=self.screen.app.NOTIFICATION_TIMEOUT,
+                        severity="error",
+                    )
+                else:
+                    raise e
+
+            if details := (
                 await self.app.ctx.deps.detail_provider.get_details_for_word(
-                    word
+                    word, _on_failure
                 )
-            )
-            self.app.push_screen(WordDetailScreen(word=details))
+            ):
+                self.app.push_screen(WordDetailScreen(word=details))
 
         return __action
 

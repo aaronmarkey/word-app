@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-08-20 08:59-0600\n"
+"POT-Creation-Date: 2025-08-20 13:39-0600\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -105,98 +105,106 @@ msgstr ""
 msgid "screen.word_details.sidebar.thes_desc"
 msgstr ""
 
-#: word_app/lex.py:84
+#: word_app/lex.py:80
+msgid "screen.word_details.already_here"
+msgstr ""
+
+#: word_app/lex.py:87
 msgid "service.datamuse.desc"
 msgstr ""
 
-#: word_app/lex.py:85
+#: word_app/lex.py:88
 msgid "service.datamuse.name"
 msgstr ""
 
-#: word_app/lex.py:89
+#: word_app/lex.py:92
 msgid "service.worknik.desc"
 msgstr ""
 
-#: word_app/lex.py:90
+#: word_app/lex.py:93
 msgid "service.worknik.name"
 msgstr ""
 
-#: word_app/lex.py:96
+#: word_app/lex.py:99
 msgid "ui.btn.back"
 msgstr ""
 
-#: word_app/lex.py:97
+#: word_app/lex.py:100
 msgid "ui.btn.close"
 msgstr ""
 
-#: word_app/lex.py:98
+#: word_app/lex.py:101
 msgid "ui.btn.close_all"
 msgstr ""
 
-#: word_app/lex.py:100
+#: word_app/lex.py:103
 msgid "ui.btn.help"
 msgstr ""
 
-#: word_app/lex.py:101
+#: word_app/lex.py:104
 msgid "ui.btn.quick_find"
 msgstr ""
 
-#: word_app/lex.py:102
+#: word_app/lex.py:105
 msgid "ui.btn.go_to_bottom"
 msgstr ""
 
-#: word_app/lex.py:103
+#: word_app/lex.py:106
 msgid "ui.btn.go_to_top"
 msgstr ""
 
-#: word_app/lex.py:104
+#: word_app/lex.py:107
 msgid "ui.btn.next"
 msgstr ""
 
-#: word_app/lex.py:105
+#: word_app/lex.py:108
 msgid "ui.btn.next_page"
 msgstr ""
 
-#: word_app/lex.py:106
+#: word_app/lex.py:109
 msgid "ui.btn.prev"
 msgstr ""
 
-#: word_app/lex.py:107
+#: word_app/lex.py:110
 msgid "ui.btn.prev_page"
 msgstr ""
 
-#: word_app/lex.py:113
+#: word_app/lex.py:116
 msgid "ui.input.placeholder.api_key"
 msgstr ""
 
-#: word_app/lex.py:117
+#: word_app/lex.py:120
 msgid "ui.label.attribution"
 msgstr ""
 
-#: word_app/lex.py:118
+#: word_app/lex.py:121
 msgid "ui.label.etymologies"
 msgstr ""
 
-#: word_app/lex.py:119
+#: word_app/lex.py:122
 msgid "ui.label.error"
 msgstr ""
 
-#: word_app/lex.py:120
+#: word_app/lex.py:123
 msgid "ui.label.frequency"
 msgstr ""
 
-#: word_app/lex.py:121
+#: word_app/lex.py:124
+msgid "ui.label.information"
+msgstr ""
+
+#: word_app/lex.py:125
 msgid "ui.label.syllables"
 msgstr ""
 
-#: word_app/lex.py:122
+#: word_app/lex.py:126
 msgid "ui.label.word"
 msgstr ""
 
-#: word_app/lex.py:131
+#: word_app/lex.py:135
 msgid "screen.word_details.attribution"
 msgstr ""
 
-#: word_app/lex.py:132
+#: word_app/lex.py:136
 msgid "screen.word.frequency_tooltip"
 msgstr ""

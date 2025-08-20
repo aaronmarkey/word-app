@@ -500,6 +500,14 @@ class WordDetailScreen(WAScreen):
     # Event Listeners
     @on(ClickableText.TextClicked)
     def on_word_click(self, event: ClickableText.TextClicked) -> None:
+        if event.word.lower() == self._word.word.lower():
+            self.app.notify(
+                LEX.screen.word_details.already_here,
+                title=LEX.ui.label.information,
+                timeout=self.app.NOTIFICATION_TIMEOUT,
+                severity="information",
+            )
+            return None
         if event.click.button == 1:
             print(f"Go to word details for '{event.word}'.")
         elif event.click.button == 2:

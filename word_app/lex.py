@@ -77,6 +77,8 @@ class Lexicon:
                 thes_title: str = _("screen.word_details.sidebar.thes_title")
                 thes_desc: str = _("screen.word_details.sidebar.thes_desc")
 
+            already_here: str = _("screen.word_details.already_here")
+
     @frozen
     class service:
         @frozen
@@ -118,6 +120,7 @@ class Lexicon:
             etymologies: str = _("ui.label.etymologies")
             error: str = _("ui.label.error")
             frequency: str = _("ui.label.frequency")
+            information: str = _("ui.label.information")
             syllables: str = _("ui.label.syllables")
             word: str = _("ui.label.word")
 

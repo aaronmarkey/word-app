@@ -211,3 +211,11 @@ msgstr "Failed to authenticate with dictionary providers."
 #: word_app/lex.py:119
 msgid "ui.label.error"
 msgstr "ERROR!"
+
+#: word_app/lex.py:80
+msgid "screen.word_details.already_here"
+msgstr "Already at page for word."
+
+#: word_app/lex.py:124
+msgid "ui.label.information"
+msgstr "HEY, LISTEN!"

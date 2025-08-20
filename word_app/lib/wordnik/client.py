@@ -8,6 +8,7 @@ from typing_extensions import AsyncGenerator
 from word_app.lib.wordnik.conf import (
     Definitions,
     Examples,
+    Phrases,
     RelatedWords,
     WordnikApiConf,
     WordnikEndpoint,
@@ -71,6 +72,13 @@ class WordnikApiClient:
         resp = await self._request(word, endpoint)
         for example in self.transformer.example_search_result(resp.json()):
             yield example
+
+    async def get_phrases(
+        self, *, word: str, endpoint: Phrases
+    ) -> AsyncGenerator:
+        resp = await self._request(word, endpoint)
+        for bigram in self.transformer.bigrams(resp.json()):
+            yield bigram
 
     async def get_related_words(
         self, *, word: str, endpoint: RelatedWords

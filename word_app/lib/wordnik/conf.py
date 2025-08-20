@@ -132,6 +132,24 @@ class Examples(WordnikEndpoint):
 
 
 @dataclass
+class Phrases(WordnikEndpoint):
+    @dataclass
+    class Wlmi(Param):
+        name: str = field(default="wlmi")
+        value: int | None = field(default=None)
+
+    Limit: TypeAlias = _Limit  # type: ignore
+    UseCanonical: TypeAlias = _UseCanonical  # type: ignore
+    Word: TypeAlias = _Word  # type: ignore
+
+    _endpoint_purpose: str = "phrases"
+    limit: Limit = field(default_factory=Limit)
+    use_canonical: UseCanonical = field(default_factory=UseCanonical)
+    wlmi: Wlmi = field(default_factory=Wlmi)
+    word: Word = field(default_factory=Word)
+
+
+@dataclass
 class RelatedWords(WordnikEndpoint):
     @dataclass
     class LimitPerRelationshipType(Param):

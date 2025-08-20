@@ -8,6 +8,8 @@ from word_app.data.models import (
     Example,
     Examples,
     Nym,
+    Phrase,
+    Phrases,
     Thesaurus,
     Word,
 )
@@ -16,6 +18,7 @@ from word_app.lib.datamuse.client import DatamuseApiClient
 from word_app.lib.wordnik.client import WordnikApiClient
 from word_app.lib.wordnik.conf import Definitions as WnDefintions
 from word_app.lib.wordnik.conf import Examples as WnExamples
+from word_app.lib.wordnik.conf import Phrases as WnPhrases
 from word_app.lib.wordnik.conf import RelatedWords as WnRelatedWords
 from word_app.lib.wordnik.models import (
     AmericanHeritage,
@@ -51,6 +54,17 @@ class MultisourceDetailProvider(AbstractWordDetailProvider):
         self._datamuse_transformer: WnToWaTransformer = datamuse_transformer
         self._wordnik_client: WordnikApiClient = wordnik_client
         self._wordnik_transformer: WnToWaTransformer = wordnik_transformer
+
+    async def _wn_bigrams(self, word: str) -> AsyncGenerator:
+        async for bigram in self._wordnik_client.get_phrases(
+            word=word,
+            endpoint=WnPhrases(
+                word=WnPhrases.Word(value=word),
+                limit=WnPhrases.Limit(value=50),
+                wlmi=WnPhrases.Wlmi(value=10),
+            ),
+        ):
+            yield bigram
 
     async def _wn_definitions(self, word: str) -> AsyncGenerator:
         async for definition in self._wordnik_client.get_definitions(
@@ -103,6 +117,12 @@ class MultisourceDetailProvider(AbstractWordDetailProvider):
             examples.append(self._wordnik_transformer.example(wne))
         return Examples(examples=examples)
 
+    async def _phrases(self, word: str) -> Phrases:
+        phrases: list[Phrase] = []
+        async for wnb in self._wn_bigrams(word):
+            phrases.append(self._wordnik_transformer.phrase(wnb))
+        return Phrases(phrases=phrases)
+
     async def _thesaurus(self, word: str) -> Thesaurus:
         nyms: list[Nym] = []
         async for wnr in self._wn_thesaurus(word):
@@ -124,11 +144,12 @@ class MultisourceDetailProvider(AbstractWordDetailProvider):
 
         try:
             objs: tuple[
-                Definitions, Thesaurus, Examples
+                Definitions, Thesaurus, Examples, Phrases
             ] = await asyncio.gather(
                 self._definitions(word),
                 self._thesaurus(word),
                 self._examples(word),
+                self._phrases(word),
             )
         except Exception as e:
             return on_failure(e)
@@ -138,4 +159,5 @@ class MultisourceDetailProvider(AbstractWordDetailProvider):
                 definitions=objs[0],
                 thesaurus=objs[1],
                 examples=objs[2],
+                phrases=objs[3],
             )

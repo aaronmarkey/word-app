@@ -3,7 +3,8 @@ from typing import ClassVar
 from markdown_it import MarkdownIt
 
 from word_app.data import grammar
-from word_app.data.models import Definition, Example, Nym
+from word_app.data.models import Definition, Example, Nym, Phrase
+from word_app.lib.wordnik.models import Bigram as WnBigram
 from word_app.lib.wordnik.models import Definition as WnDefinition
 from word_app.lib.wordnik.models import Example as WnExample
 from word_app.lib.wordnik.models import PartOfSpeech, RelationshipType
@@ -74,6 +75,10 @@ class WnToWaTransformer:
         sentence = self._MARKDOWN.render(inp.text)
         sentence = self._HTML_TO_MARKUP.transform(sentence)
         return Example(attribution="", type=grammar.Sentence, text=sentence)
+
+    def phrase(self, inp: WnBigram) -> Phrase:
+        text = f"{inp.gram1} {inp.gram2}" if inp.gram2 else inp.gram1
+        return Phrase(attribution="", type=grammar.Nothing, text=text)
 
     def thesaurus(self, inp: WnRelated) -> list[Nym]:
         return [

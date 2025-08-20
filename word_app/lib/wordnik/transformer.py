@@ -6,6 +6,7 @@ from typing import Self
 from wordnik.models import *  # noqa: F403
 
 from word_app.lib.wordnik.models import (  # noqa
+    Bigram,
     Citation,
     ContentProvider,
     Definition,
@@ -100,6 +101,9 @@ class WordnikTransformer:
     def example_search_result(self: Self, response: dict) -> list[Example]:  # noqa: F405
         results = deserialize(response, "ExampleSearchResults")
         return results.examples
+
+    def bigrams(self: Self, response: list[dict]) -> list[Bigram]:
+        return deserialize(response, "list[Bigram]")
 
     def related(self: Self, response: list[dict]) -> list[Related]:  # noqa: F405
         return deserialize(response, "list[Related]")

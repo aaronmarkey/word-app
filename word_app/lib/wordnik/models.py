@@ -4,6 +4,7 @@ from dataclasses import dataclass
 from enum import StrEnum
 
 from wordnik.models import (  # noqa
+    Bigram,
     Citation,
     ContentProvider,
     Definition,

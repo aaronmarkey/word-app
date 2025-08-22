@@ -40,14 +40,14 @@
 - [x] ABC
 - [x] FakeDetailProvider
 - [ ] MultisourseDetailProvider
-  - [ ] definitions from WN
-  - [ ] all the relateds from WN
+  - [x] definitions from WN
+  - [x] all the relateds from WN
   - [ ] interface to inject additional WordDetail objects, already fetched.
 
 
 ## Misc
 - [ ] General project clean up.
-  - [ ] Reorg code to better directory structure.
+  - [x] Reorg code to better directory structure.
   - [x] Ruff config: check import order.
   - [ ] Document things.
   - [x] i18n

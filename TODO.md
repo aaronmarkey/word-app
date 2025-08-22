@@ -51,6 +51,8 @@
   - [x] Ruff config: check import order.
   - [ ] Document things.
   - [x] i18n
+  - [ ] Remove dep on lib and infra import in tui.
+- [ ] Refactor the search provider classes.
 - [x] Rethink session/cmd-line conf differences.
 - [x] Replace theme variables with "interace-color" and "hover-color"
 - [x] Defaults in UserConf class.
